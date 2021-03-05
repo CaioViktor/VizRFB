@@ -1,0 +1,24 @@
+.chart_test{
+	height: 100%;
+	width: 100%;
+	min-height: 100%;
+	min-width: 100%;
+	display: block;
+}
+
+#Q1{
+	position: absolute;
+	top: 0%;
+}
+#Q11{
+	position: absolute;
+	top: 100%;
+}
+#Q2{
+	position: absolute;
+	top: 200%;
+}
+#Q3{
+	position: absolute;
+	top: 300%;
+}
