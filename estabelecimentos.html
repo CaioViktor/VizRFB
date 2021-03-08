@@ -21,15 +21,22 @@
 	<div class="chart_test" id="Q1">d</div>
 	<div class="chart_test" id="Q11">
 		<div id="Q11_linechart"></div>
+		<div id="paging">
+	        Showing <span id="begin"></span>-<span id="end"></span> of <span id="size"></span> <span id="totalsize"></span>
+	        <input id="last" class="btn" type="Button" value="Last" onclick="javascript:last()" />
+	        <input id="next" class="btn" type="button" value="Next" onclick="javascript:next()"/>
+	     </div>
 		<table class="table table-hover" id="table_estabs">
         <thead>
             <tr class="header">
-                <th>Root CNPJ</th>
+                <th>CNPJ Raiz</th>
                 <th>CNPJ</th>
-                <th>Name</th>
-                <th>Date Start</th>
-                <th>Situation</th>
-                <th>State</th>
+                <th>Nome</th>
+                <th>Porte</th>
+                <th>Início das atividades</th>
+                <th>Sitação</th>
+                <th>Data da situação</th>
+                <th>Unidade Federativa</th>
             </tr>
         </thead>
     	</table>
