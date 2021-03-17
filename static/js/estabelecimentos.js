@@ -1,4 +1,6 @@
 const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+
+// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 var w = window.innerWidth-100;
 var h = window.innerHeight/2;
 let next,last;
@@ -6,25 +8,27 @@ format = d3.format(".2f")
 
 
 
-d3.csv(path_estabelecimentos).then(function(data){
+var data = d3.csv(path_estabelecimentos).then(function(data){
 	//root_cnpj,cnpj_est,name,porte,date_start,situation,situationDate,state
 	let parseDate = d3.utcParse("%Y-%m-%d");
 	data.forEach(function(d){
+		d.date_start_month = parseDate(d.date_start.substr(0,7)+"-02");
 		d.date_start = parseDate(d.date_start);
+		d.situationDate_month = parseDate(d.situationDate.substr(0,7)+"-02");
 		d.situationDate = parseDate(d.situationDate);
 	});
 	
 	let lineChartQ11 = dc.lineChart("#Q11_linechart");
 	let data_table = dc.dataTable("#table_estabs");
 	let barchart= dc.barChart("#Q3");
-	// let lineChartF = dc.lineChart("#fechados");
+	let lineChart_situation = dc.seriesChart("#fechados");
 
 
 	let facts = crossfilter(data);
 
 
 	//Q11
-	let dim_date_start = facts.dimension(d=>d.date_start);
+	let dim_date_start = facts.dimension(d=>d.date_start_month);
 	let _group = dim_date_start.group().reduceSum(function(d){return 1});
 	var group_date_start = {
 		all:function () {
@@ -37,7 +41,7 @@ d3.csv(path_estabelecimentos).then(function(data){
 			return g;
 		}
 	};
-	let hourScale = d3.scaleTime().domain(d3.extent(data,d=> d.date_start))
+	let hourScale = d3.scaleTime().domain(d3.extent(data,d=> d.date_start_month))
 
 	lineChartQ11.width(w)
             .height(h)
@@ -50,7 +54,7 @@ d3.csv(path_estabelecimentos).then(function(data){
 	        .xAxisLabel("Ano de início das atividades")
 	        .clipPadding(10)
 	        .elasticY(true)
-	        .title(function(d) { return 'Dia: ' + d.key+'\nAcumulado: '+ d.value+'\nNo dia: '+d.in_day; })
+	        .title(function(d) { return 'Data: ' + d.key+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
             .brushOn(false)
             .mouseZoomable(true);
 
@@ -60,7 +64,7 @@ d3.csv(path_estabelecimentos).then(function(data){
 
     //Q3
     let dim_porte = facts.dimension(function(d){ return d.porte});
-    let situacoes = ["Ativa","Baixada","Inapta","Nula"];
+    let situacoes = ["Ativa","Baixada","Inapta","Nula","Suspensa"];
     let group_porte_situacao = dim_porte.group().reduce(function(p,v){
 			//Add
 			p[v.situation] = (p[v.situation] || 0) + 1;
@@ -73,7 +77,7 @@ d3.csv(path_estabelecimentos).then(function(data){
 			//Init
 			return {};
 		});
-		// console.log(candidatosGroup);
+		
 		function sel_stack(i) {
               return function(d) {
                 	return d.value[i];
@@ -81,8 +85,8 @@ d3.csv(path_estabelecimentos).then(function(data){
           	}
 
     let colorScale = d3.scaleOrdinal()
-                 .domain(["Ativa","Baixada","Inapta","Nula"])
-                 .range(["#4daf4a", "#e41a1c", "#984ea3","#377eb8"])
+                 .domain(["Ativa","Baixada","Inapta","Nula","Suspensa"])
+                 .range(["#4daf4a", "#e41a1c", "#984ea3","#377eb8","#0dfeb9"])
 
     barchart.width(768)
                 .height(480)
@@ -109,7 +113,7 @@ d3.csv(path_estabelecimentos).then(function(data){
                 .colors(colorScale);
 
     barchart.legend(dc.legend());
-    for (var i = 1; i < 4; ++i) {
+    for (var i = 1; i < 4; ++i) {//TODO:Ver porque está dando erro ao colocar as 5 situações
                 barchart.stack(group_porte_situacao, '' + situacoes[i], sel_stack(situacoes[i]));
 	}
 
@@ -177,42 +181,62 @@ d3.csv(path_estabelecimentos).then(function(data){
 
 
 
- //    //Fechados
- // 	let dim_fechados_date_start = facts.dimension(d=>d.situationDate);
-
-	// let _group_fechados = dim_fechados_date_start.filter(d=>d.situation == "Baixada").group().reduceSum(function(d){return 1});
-	// var group_fechados_date_start = {
-	// 	all:function () {
-	// 		var cumulate = 0;
-	// 		var g = [];
-	// 		_group_fechados.all().forEach(function(d,i) {
-	// 			cumulate += d.value;
-	// 			g.push({key:d.key,value:cumulate,'in_day':d.value})
-	// 		});
-	// 		return g;
-	// 	}
-	// };
-	// let hourScale_fechados = d3.scaleTime().domain(d3.extent(data,d=> d.situationDate))
-
-	// lineChartF.width(w)
- //            .height(h)
- // 			.margins({left: 80, top: 20, right: 10, bottom: 40})
- //            .dimension(dim_fechados_date_start)
- //            .group(group_fechados_date_start)
- //            .x(hourScale_fechados)
- //            .renderArea(true)
- //            .yAxisLabel("Quantidade de estabelecimentos fechados")
-	//         .xAxisLabel("Ano de início das atividades")
-	//         .clipPadding(10)
-	//         .elasticY(true)
-	//         .title(function(d) { return 'Dia: ' + d.key+'\nAcumulado: '+ d.value+'\nNo dia: '+d.in_day; })
- //            .brushOn(false)
- //            .mouseZoomable(true);
+    
            
 
+ 		let dim_situation = facts.dimension(d=>[d.situation,d.situationDate_month]);
+ 		let _group_situation = dim_situation.group().reduceSum(function(d){return 1});
+		
+		
+		var group_situation = {
+			all:function () {
+				var cumulate = {};
+				var g = [];
+				_group_situation.all().sort(function(a,b){
+					var a_m = a.key[1].getMonth();
+					if(a_m < 10){
+						a_m = "0"+a_m 
+					}
+					var b_m = b.key[1].getMonth();
+					if(b_m < 10){
+						b_m = "0"+b_m 
+					}
+					if ((a.key[0]+a.key[1].getFullYear()+a_m) > (b.key[0]+b.key[1].getFullYear()+b_m)) 
+						return 1; 
+					else return -1
+				}
+					).forEach(function(d,i) {
+					if(!(d.key[0] in cumulate))
+						cumulate[d.key[0]] = d.value;
+					else
+						cumulate[d.key[0]] += d.value;
+					g.push({key:d.key,value:cumulate[d.key[0]],'in_day':d.value})
+				});
+				return g;
+			}
+		};
+		let hourScale_situation = d3.scaleTime().domain(d3.extent(data,d=> d.situationDate_month))
 
 
-
+ 		lineChart_situation.width(w)
+         .height(h)
+         .chart(function(c) { return new dc.LineChart(c); })
+         .x(hourScale_situation)
+         .brushOn(false)
+         .yAxisLabel("Quantidade acumulada de estabelecimentos")
+         .xAxisLabel("Data da situação")
+         .clipPadding(10)
+         .elasticY(true)
+         .dimension(dim_situation)
+         .group(group_situation)
+         .mouseZoomable(true)
+         .seriesAccessor(function(d) { return d.key[0];})
+         .keyAccessor(function(d) {return d.key[1];})
+         .valueAccessor(function(d) { return +d.value;})
+         // .ordinalColors([types['BURGLARY'],types['HOMICIDE'],types['ROBBERY']])
+         .colors(colorScale)
+         .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
+         .xAxis().ticks(5);
 
 
 
@@ -222,4 +246,5 @@ d3.csv(path_estabelecimentos).then(function(data){
 
 
   dc.renderAll()
+  return data;
 });
