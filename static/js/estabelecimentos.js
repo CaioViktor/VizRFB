@@ -1,6 +1,6 @@
-const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 var w = window.innerWidth-100;
 var h = window.innerHeight/2;
 let next,last;
@@ -9,7 +9,7 @@ format = d3.format(".2f")
 
 
 var data = d3.csv(path_estabelecimentos).then(function(data){
-	//root_cnpj,cnpj_est,name,porte,date_start,situation,situationDate,state
+	//root_cnpj,cnpj_est,name,date_start,situation,situationDate,state,porte,activity
 	let parseDate = d3.utcParse("%Y-%m-%d");
 	data.forEach(function(d){
 		d.date_start_month = parseDate(d.date_start.substr(0,7)+"-02");
@@ -21,7 +21,8 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	let lineChartQ11 = dc.lineChart("#Q11_linechart");
 	let data_table = dc.dataTable("#table_estabs");
 	let barchart= dc.barChart("#Q3");
-	let lineChart_situation = dc.seriesChart("#fechados");
+	let lineChart_situation = dc.seriesChart("#situacoes_linha");
+	let rowChartQ2 = dc.rowChart("#Q2");
 
 
 	let facts = crossfilter(data);
@@ -65,6 +66,14 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
     //Q3
     let dim_porte = facts.dimension(function(d){ return d.porte});
     let situacoes = ["Ativa","Baixada","Inapta","Nula","Suspensa"];
+    barchart.ordering(function(d){
+    	let cont = 0;
+    	for(i in d.value) {
+    		cont+= d.value[i];
+    	}
+    	return -cont;
+    });
+
     let group_porte_situacao = dim_porte.group().reduce(function(p,v){
 			//Add
 			p[v.situation] = (p[v.situation] || 0) + 1;
@@ -113,7 +122,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                 .colors(colorScale);
 
     barchart.legend(dc.legend());
-    for (var i = 1; i < 4; ++i) {//TODO:Ver porque está dando erro ao colocar as 5 situações
+    for (var i = 1; i < 5; ++i) {//TODO:Ver porque está dando erro ao colocar as 5 situações no completo
                 barchart.stack(group_porte_situacao, '' + situacoes[i], sel_stack(situacoes[i]));
 	}
 
@@ -170,7 +179,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
             .height(h)
             .dimension(dim_cnpj)
             .size(pag)
-            .columns([d=>d.root_cnpj,d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start,d=>d.situation,d=>d.situationDate,d=>d.state])
+            .columns([d=>d.root_cnpj,d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
             .sortBy(d=>d.root_cnpj)
             .order(d3.ascending)
             .on('preRender', update_offset)
@@ -183,60 +192,60 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
     
            
+    //Gráfico de linha das situações
+    //TODO: Ver porque está dando erro ao filtrar
+	let dim_situation = facts.dimension(d=>[d.situation,d.situationDate_month]);
+	let _group_situation = dim_situation.group().reduceSum(function(d){return 1});
 
- 		let dim_situation = facts.dimension(d=>[d.situation,d.situationDate_month]);
- 		let _group_situation = dim_situation.group().reduceSum(function(d){return 1});
-		
-		
-		var group_situation = {
-			all:function () {
-				var cumulate = {};
-				var g = [];
-				_group_situation.all().sort(function(a,b){
-					var a_m = a.key[1].getMonth();
-					if(a_m < 10){
-						a_m = "0"+a_m 
-					}
-					var b_m = b.key[1].getMonth();
-					if(b_m < 10){
-						b_m = "0"+b_m 
-					}
-					if ((a.key[0]+a.key[1].getFullYear()+a_m) > (b.key[0]+b.key[1].getFullYear()+b_m)) 
-						return 1; 
-					else return -1
+	
+	var group_situation = {
+		all:function () {
+			var cumulate = {};
+			var g = [];
+			_group_situation.all().sort(function(a,b){
+				var a_m = a.key[1].getMonth();
+				if(a_m < 10){
+					a_m = "0"+a_m 
 				}
-					).forEach(function(d,i) {
-					if(!(d.key[0] in cumulate))
-						cumulate[d.key[0]] = d.value;
-					else
-						cumulate[d.key[0]] += d.value;
-					g.push({key:d.key,value:cumulate[d.key[0]],'in_day':d.value})
-				});
-				return g;
+				var b_m = b.key[1].getMonth();
+				if(b_m < 10){
+					b_m = "0"+b_m 
+				}
+				if ((a.key[0]+a.key[1].getFullYear()+a_m) > (b.key[0]+b.key[1].getFullYear()+b_m)) 
+					return 1; 
+				else return -1
 			}
-		};
-		let hourScale_situation = d3.scaleTime().domain(d3.extent(data,d=> d.situationDate_month))
+				).forEach(function(d,i) {
+				if(!(d.key[0] in cumulate))
+					cumulate[d.key[0]] = d.value;
+				else
+					cumulate[d.key[0]] += d.value;
+				g.push({key:d.key,value:cumulate[d.key[0]],'in_day':d.value})
+			});
+			return g;
+		}
+	};
+	let hourScale_situation = d3.scaleTime().domain(d3.extent(data,d=> d.situationDate_month))
 
 
- 		lineChart_situation.width(w)
-         .height(h)
-         .chart(function(c) { return new dc.LineChart(c); })
-         .x(hourScale_situation)
-         .brushOn(false)
-         .yAxisLabel("Quantidade acumulada de estabelecimentos")
-         .xAxisLabel("Data da situação")
-         .clipPadding(10)
-         .elasticY(true)
-         .dimension(dim_situation)
-         .group(group_situation)
-         .mouseZoomable(true)
-         .seriesAccessor(function(d) { return d.key[0];})
-         .keyAccessor(function(d) {return d.key[1];})
-         .valueAccessor(function(d) { return +d.value;})
-         // .ordinalColors([types['BURGLARY'],types['HOMICIDE'],types['ROBBERY']])
-         .colors(colorScale)
-         .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
-         .xAxis().ticks(5);
+	lineChart_situation.width(w)
+     .height(h)
+     .chart(function(c) { return new dc.LineChart(c); })
+     .x(hourScale_situation)
+     .brushOn(false)
+     .yAxisLabel("Quantidade acumulada de estabelecimentos")
+     .xAxisLabel("Data da situação")
+     .clipPadding(10)
+     .elasticY(true)
+     .dimension(dim_situation)
+     .group(group_situation)
+     .mouseZoomable(true)
+     .seriesAccessor(function(d) { return d.key[0];})
+     .keyAccessor(function(d) {return d.key[1];})
+     .valueAccessor(function(d) { return +d.value;})
+     .colors(colorScale)
+     .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
+     .xAxis().ticks(5);
 
 
 
@@ -244,6 +253,28 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 
 
+
+
+
+     //Gráfico de Q2
+     let dim_atividades = facts.dimension(d => d.activity);
+     let group_atividades = dim_atividades.group();
+     let scaleAtividades = d3.scaleLinear().domain([0,group_atividades.top(1)[0].value]);
+     rowChartQ2.ordering(function(d){return -d.value});
+
+
+     rowChartQ2.width(w)
+		.height(h)
+		.dimension(dim_atividades)
+		.group(group_atividades)
+		.x(scaleAtividades)
+		// .label(function(d){return d.key;})
+		.margins({top: 50, right: 50, bottom: 25, left: 40})
+		.elasticX(true)
+		.valueAccessor(function(d) { return +d.value;})
+		.othersGrouper(false)
+		.colors(['#0d6efd'])
+		.cap(10);
 
   dc.renderAll()
   return data;
