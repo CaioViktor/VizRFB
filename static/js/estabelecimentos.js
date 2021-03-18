@@ -1,12 +1,71 @@
 // const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
 const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+const  path_brazil = path_data+"brazil.json";
 var w = window.innerWidth-100;
 var h = window.innerHeight/2;
+let mapa = null;
 let next,last;
 format = d3.format(".2f")
 
+function renderMap(data){
+	const width = w;
+	const height = h*2;
+	const svg = d3.select("#Q1").append("svg");
 
+
+	var projection =  d3.geoMercator()
+					  .scale(600)
+					  .center([-52, -17]);
+	  // .translate([width / 2 + 18, height / 2 + 20]);
+
+	path = d3.geoPath().projection(projection);
+
+
+
+	svg.attr("width",w)
+		.attr("height",h);
+
+	svg.append("g")
+	  .attr("class", "states")
+	.selectAll("path")
+	  .data(topojson.feature(data, data.objects.estados).features)
+	.enter().append("path")
+	  // .attr("fill", d => colorScale(rateById.get(d.id)))
+	  .attr("fill", "blue")
+	  .attr("d", path)
+	  .on("mouseover", function(d){
+	    d3.select(this) // seleciona o elemento atual
+	    .style("cursor", "pointer") //muda o mouse para mãozinha
+	    .attr("stroke-width", 3)
+	    .attr("stroke","#FFF5B1");
+
+	    // const rect = this.getBoundingClientRect();
+	    // showTooltip(d.id, rect.x, rect.y);
+	  })
+	.on("mouseout", function(d){
+	    d3.select(this)
+	    .style("cursor", "default")
+	    .attr("stroke-width", 0)
+	    .attr("stroke","none"); //volta ao valor padrão
+
+	    // hideTooltip();
+	    })
+
+	svg.append("path")
+	  .datum(topojson.mesh(data, data.objects.estados, function(a, b) { return a !== b; }))
+	  .attr("class", "states")
+	  .attr("d", path)
+
+
+	// Once we append the vis elments to it, we return the DOM element for Observable to display above.
+	return svg.node()
+}
+
+var brazil = d3.json(path_brazil).then(function(data){
+	mapa=renderMap(data);
+	return data;
+});
 
 var data = d3.csv(path_estabelecimentos).then(function(data){
 	//root_cnpj,cnpj_est,name,date_start,situation,situationDate,state,porte,activity
