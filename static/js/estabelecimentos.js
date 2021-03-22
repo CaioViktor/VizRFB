@@ -6,9 +6,11 @@ var w = window.innerWidth-100;
 var h = window.innerHeight/2;
 let mapa = null;
 let next,last;
-format = d3.format(".2f")
+let colorScale_mapa = null;
+let state_name_mapa = new Map();
+let format = d3.format(".2f")
 
-function renderMap(data){
+function renderMap(data,map){
 	const width = w;
 	const height = h*2;
 	const svg = d3.select("#Q1").append("svg");
@@ -31,17 +33,18 @@ function renderMap(data){
 	.selectAll("path")
 	  .data(topojson.feature(data, data.objects.estados).features)
 	.enter().append("path")
-	  // .attr("fill", d => colorScale(rateById.get(d.id)))
-	  .attr("fill", "blue")
+	  .attr("fill", d => colorScale_mapa(map.get(d.id)))
+	  // .attr("fill", "blue")
 	  .attr("d", path)
+	  .attr("element_id",d=>d.id)
 	  .on("mouseover", function(d){
 	    d3.select(this) // seleciona o elemento atual
 	    .style("cursor", "pointer") //muda o mouse para mãozinha
 	    .attr("stroke-width", 3)
 	    .attr("stroke","#FFF5B1");
-
-	    // const rect = this.getBoundingClientRect();
-	    // showTooltip(d.id, rect.x, rect.y);
+	    
+	    const rect = this.getBoundingClientRect();
+	    showTooltip(map,this.getAttribute("element_id"), rect.x, rect.y);
 	  })
 	.on("mouseout", function(d){
 	    d3.select(this)
@@ -49,23 +52,75 @@ function renderMap(data){
 	    .attr("stroke-width", 0)
 	    .attr("stroke","none"); //volta ao valor padrão
 
-	    // hideTooltip();
-	    })
+	    hideTooltip(map);
+	});
 
 	svg.append("path")
 	  .datum(topojson.mesh(data, data.objects.estados, function(a, b) { return a !== b; }))
 	  .attr("class", "states")
 	  .attr("d", path)
-
+	d3.select("#tooltip").remove()
+	  let node = d3.select("body")
+	      .append("div")
+	      .attr("id","tooltip")
+	      .attr("class","hidden")
+	      .append("p")
+	      .html("<h4 id='name_county'></h4>Quantidade de estabelecimentos: <span id='taxa'></span>")
 
 	// Once we append the vis elments to it, we return the DOM element for Observable to display above.
 	return svg.node()
 }
 
-var brazil = d3.json(path_brazil).then(function(data){
-	mapa=renderMap(data);
-	return data;
-});
+function update_countStates(group){
+	let map = new Map();
+	let states = group.all();
+	states.forEach(function(d){
+		map.set(d.key,+d.value);
+	});
+	return map;
+}
+
+function createLegend(color_scheme){
+		
+	let div = document.createElement('div');
+	let labels = [],from, to;
+	$(div).addClass('info legend');
+	div.id = "legend";
+	const n = color_scheme.length;
+
+	for (let i = 0; i < n; i++) {
+		let c = color_scheme[i]
+        let fromto = colorScale_mapa.invertExtent(c);
+		labels.push(
+			'<i style="background:' + color_scheme[i] + '"></i> ' +
+			d3.format("d")(fromto[0]) + (d3.format("d")(fromto[1]) ? '&ndash;' + d3.format("d")(fromto[1]) : '+'));
+	}
+
+	div.innerHTML = labels.join('<br>')
+	
+  	$("#Q1").append(div);
+}
+
+function showTooltip(map,element_id, x, y) {
+	const offset = 10;
+	const t = d3.select("#tooltip");
+	
+	t.select("#taxa").text(map.get(element_id));
+	t.select("#name_county").text(state_name_mapa.get(element_id));
+	t.classed("hidden", false);
+	const rect = t.node().getBoundingClientRect();
+	const wi = rect.width;
+	const hi = rect.height;
+	if (x + offset + wi > w) {
+		x = x - wi;
+	}
+	t.style("left", x + offset + "px").style("top", y - hi + "px");
+}
+
+function hideTooltip(map){
+	d3.select("#tooltip")
+		.classed("hidden", true);
+}
 
 var data = d3.csv(path_estabelecimentos).then(function(data){
 	//root_cnpj,cnpj_est,name,date_start,situation,situationDate,state,porte,activity
@@ -85,6 +140,29 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 
 	let facts = crossfilter(data);
+
+
+
+	//Q1
+	var brazil = d3.json(path_brazil).then(function(data2){
+		
+		const features = topojson.feature(data2, data2.objects.estados).features;
+		features.forEach(function(d){
+			state_name_mapa.set(d.id,d.properties.nome);
+		});
+
+		let dim_states = facts.dimension(d => d.state);
+		let group_states = dim_states.group();
+		let map = update_countStates(group_states);
+		const domain = [group_states.top(group_states.size())[group_states.size()-1].value,group_states.top(1)[0].value];
+		const color_scheme = d3.schemeGreens[7];
+		colorScale_mapa = d3.scaleQuantile()
+			                .domain([domain[0],domain[0] + 20 * 1,domain[0] + 20 * 2,domain[0] + 20 * 3,domain[0] + 20 * 4,domain[0] + 20 * 5,domain[1]])
+			                .range(color_scheme);
+		mapa = renderMap(data2,map);
+		createLegend(color_scheme);
+		return data2;
+	});
 
 
 	//Q11
