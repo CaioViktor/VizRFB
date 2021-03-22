@@ -8,7 +8,12 @@ let mapa = null;
 let next,last;
 let colorScale_mapa = null;
 let state_name_mapa = new Map();
-let format = d3.format(".2f")
+let format = d3.format(".2f");
+let facts = null;
+let brazil = null;
+let dim_states = null;
+let previous_filter = null;
+let previous_this_map = null;
 
 function renderMap(data,map){
 	const width = w;
@@ -37,6 +42,27 @@ function renderMap(data,map){
 	  // .attr("fill", "blue")
 	  .attr("d", path)
 	  .attr("element_id",d=>d.id)
+	  .on("click",function(d){
+	  		d3.select(this) // seleciona o elemento atual
+			    .attr("stroke-width", 3)
+			    .attr("stroke","red");
+	  		let clicked_state = this.getAttribute("element_id");
+	  		if(clicked_state==previous_filter){
+	  			d3.select(this) // seleciona o elemento atual
+				    .attr("stroke-width", 0)
+	    			.attr("stroke","none"); //volta ao valor padrão
+	  			clicked_state = null;
+	  			previous_this_map = null;
+	  		}else{
+	  			d3.select(previous_this_map) // seleciona o elemento atual
+			    .attr("stroke-width", 0)
+	    		.attr("stroke","none"); //volta ao valor padrão
+	  		}
+	  		dim_states.filterExact(clicked_state);
+	  		dc.renderAll();
+	  		previous_filter = clicked_state;
+	  		previous_this_map = this;
+	  })
 	  .on("mouseover", function(d){
 	    d3.select(this) // seleciona o elemento atual
 	    .style("cursor", "pointer") //muda o mouse para mãozinha
@@ -47,11 +73,16 @@ function renderMap(data,map){
 	    showTooltip(map,this.getAttribute("element_id"), rect.x, rect.y);
 	  })
 	.on("mouseout", function(d){
+
 	    d3.select(this)
 	    .style("cursor", "default")
 	    .attr("stroke-width", 0)
 	    .attr("stroke","none"); //volta ao valor padrão
-
+	    if(previous_filter != null){
+			d3.select(previous_this_map) // seleciona o elemento atual
+			    .attr("stroke-width", 3)
+			    .attr("stroke","red");
+		}
 	    hideTooltip(map);
 	});
 
@@ -114,12 +145,30 @@ function showTooltip(map,element_id, x, y) {
 	if (x + offset + wi > w) {
 		x = x - wi;
 	}
+
+	if (y - hi < 0){
+		y = y + hi + offset*3;
+	}
 	t.style("left", x + offset + "px").style("top", y - hi + "px");
 }
 
 function hideTooltip(map){
 	d3.select("#tooltip")
 		.classed("hidden", true);
+}
+
+function createMap(){
+	$("#Q1").empty();
+	dim_states = facts.dimension(d => d.state);
+	let group_states = dim_states.group();
+	let map = update_countStates(group_states);
+	const domain = [group_states.top(group_states.size())[group_states.size()-1].value,group_states.top(1)[0].value];
+	const color_scheme = d3.schemeGreens[7];
+	colorScale_mapa = d3.scaleQuantile()
+		                .domain([domain[0],domain[0] + 20 * 1,domain[0] + 20 * 2,domain[0] + 20 * 3,domain[0] + 20 * 4,domain[0] + 20 * 5,domain[1]])
+		                .range(color_scheme);
+	mapa = renderMap(brazil,map);
+	createLegend(color_scheme);
 }
 
 var data = d3.csv(path_estabelecimentos).then(function(data){
@@ -139,29 +188,19 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	let rowChartQ2 = dc.rowChart("#Q2");
 
 
-	let facts = crossfilter(data);
+	facts = crossfilter(data);
 
 
 
 	//Q1
-	var brazil = d3.json(path_brazil).then(function(data2){
+	d3.json(path_brazil).then(function(data2){
 		
 		const features = topojson.feature(data2, data2.objects.estados).features;
 		features.forEach(function(d){
 			state_name_mapa.set(d.id,d.properties.nome);
 		});
-
-		let dim_states = facts.dimension(d => d.state);
-		let group_states = dim_states.group();
-		let map = update_countStates(group_states);
-		const domain = [group_states.top(group_states.size())[group_states.size()-1].value,group_states.top(1)[0].value];
-		const color_scheme = d3.schemeGreens[7];
-		colorScale_mapa = d3.scaleQuantile()
-			                .domain([domain[0],domain[0] + 20 * 1,domain[0] + 20 * 2,domain[0] + 20 * 3,domain[0] + 20 * 4,domain[0] + 20 * 5,domain[1]])
-			                .range(color_scheme);
-		mapa = renderMap(data2,map);
-		createLegend(color_scheme);
-		return data2;
+		brazil = data2;
+		createMap();
 	});
 
 
@@ -194,7 +233,10 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	        .elasticY(true)
 	        .title(function(d) { return 'Data: ' + d.key+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
             .brushOn(false)
-            .mouseZoomable(true);
+            .mouseZoomable(true)
+            .on("filtered", function(chart,filter){
+			        createMap()
+			});
 
 
 
@@ -256,7 +298,10 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                 .dimension(dim_porte)
                 .group(group_porte_situacao, situacoes[0], sel_stack(situacoes[0]))
                 .renderLabel(true)
-                .colors(colorScale);
+                .colors(colorScale)
+                .on("filtered", function(chart,filter){
+			        createMap()
+			    });
 
     barchart.legend(dc.legend());
     for (var i = 1; i < 5; ++i) {//TODO:Ver porque está dando erro ao colocar as 5 situações no completo
@@ -366,23 +411,26 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 
 	lineChart_situation.width(w)
-     .height(h)
-     .chart(function(c) { return new dc.LineChart(c); })
-     .x(hourScale_situation)
-     .brushOn(false)
-     .yAxisLabel("Quantidade acumulada de estabelecimentos")
-     .xAxisLabel("Data da situação")
-     .clipPadding(10)
-     .elasticY(true)
-     .dimension(dim_situation)
-     .group(group_situation)
-     .mouseZoomable(true)
-     .seriesAccessor(function(d) { return d.key[0];})
-     .keyAccessor(function(d) {return d.key[1];})
-     .valueAccessor(function(d) { return +d.value;})
-     .colors(colorScale)
-     .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
-     .xAxis().ticks(5);
+				     .height(h)
+				     .chart(function(c) { return new dc.LineChart(c); })
+				     .x(hourScale_situation)
+				     .brushOn(false)
+				     .yAxisLabel("Quantidade acumulada de estabelecimentos")
+				     .xAxisLabel("Data da situação")
+				     .clipPadding(10)
+				     .elasticY(true)
+				     .dimension(dim_situation)
+				     .group(group_situation)
+				     .mouseZoomable(true)
+				     .seriesAccessor(function(d) { return d.key[0];})
+				     .keyAccessor(function(d) {return d.key[1];})
+				     .valueAccessor(function(d) { return +d.value;})
+				     .colors(colorScale)
+				     .on("filtered", function(chart,filter){
+					    createMap()
+					})
+				     .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
+				     .xAxis().ticks(5);
 
 
 
@@ -411,7 +459,10 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 		.valueAccessor(function(d) { return +d.value;})
 		.othersGrouper(false)
 		.colors(['#0d6efd'])
-		.cap(10);
+		.cap(10)
+		.on("filtered", function(chart,filter){
+			createMap()
+		});
 
   dc.renderAll()
   return data;
