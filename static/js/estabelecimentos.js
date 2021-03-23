@@ -285,6 +285,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                 .gap(40)
                 .yAxisLabel("Quantidade de estabelecimentos")
 	        	.xAxisLabel("Porte")
+	        	.elasticY(true)
                 .title(function (d) {
                 	let total = 0
                 	for (i in d.value){
