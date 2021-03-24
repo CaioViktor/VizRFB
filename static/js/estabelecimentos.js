@@ -34,7 +34,7 @@ function renderMap(data,map){
 
 	svg.attr("width",width)
 		.attr("height",height);
-
+	//TODO: Calcular cor para taxa de 100.000 habitantes usar campo "popula"
 	svg.append("g")
 	  .attr("class", "states")
 	.selectAll("path")
@@ -179,7 +179,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	data.forEach(function(d){
 		d.date_start_month = parseDate(d.date_start.substr(0,7)+"-02");
 		d.date_start = parseDate(d.date_start);
-		d.situationDate_month = parseDate(d.situationDate.substr(0,7)+"-02");
+		d.situationDate_month = d.situationDate.substr(0,7)+"-01";
 		d.situationDate = parseDate(d.situationDate);
 	});
 	
@@ -229,11 +229,11 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
             .group(group_date_start)
             .x(hourScale)
             .renderArea(true)
-            .yAxisLabel("Quantidade de estabelecimentos")
+            .yAxisLabel("Qtd. de estabelecimentos")
 	        .xAxisLabel("Ano de início das atividades")
 	        .clipPadding(10)
 	        .elasticY(true)
-	        .title(function(d) { return 'Data: ' + d.key+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
+	        .title(function(d) { return 'Mês: ' + d.key.toLocaleDateString().substr(3)+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
             .brushOn(false)
             .mouseZoomable(true)
             .on("filtered", function(chart,filter){
@@ -285,7 +285,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                 .brushOn(false)
                 .clipPadding(20)
                 .gap(40)
-                .yAxisLabel("Quantidade de estabelecimentos")
+                .yAxisLabel("Qtd. de estabelecimentos")
 	        	.xAxisLabel("Porte")
 	        	.elasticY(true)
                 .title(function (d) {
@@ -307,7 +307,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 			    });
 
     barchart.legend(dc.legend());
-    for (var i = 1; i < 5; ++i) {//TODO:Ver porque está dando erro ao colocar as 5 situações no completo
+    for (var i = 1; i < 5; ++i) {
                 barchart.stack(group_porte_situacao, '' + situacoes[i], sel_stack(situacoes[i]));
 	}
 
@@ -378,39 +378,30 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
     
            
     //Gráfico de linha das situações
-    //TODO: Ver porque está dando erro ao filtrar
 	let dim_situation = facts.dimension(d=>[d.situation,d.situationDate_month]);
-	let _group_situation = dim_situation.group().reduceSum(function(d){return 1});
-
+	let _group_situation = dim_situation.group();
 	
 	var group_situation = {
 		all:function () {
 			var cumulate = {};
 			var g = [];
-			_group_situation.all().sort(function(a,b){
-				var a_m = a.key[1].getMonth();
-				if(a_m < 10){
-					a_m = "0"+a_m 
-				}
-				var b_m = b.key[1].getMonth();
-				if(b_m < 10){
-					b_m = "0"+b_m 
-				}
-				if ((a.key[0]+a.key[1].getFullYear()+a_m) > (b.key[0]+b.key[1].getFullYear()+b_m)) 
-					return 1; 
-				else return -1
-			}
-				).forEach(function(d,i) {
+			let parseDate = d3.utcParse("%Y-%m-%d");
+			_group_situation.all().forEach(function(d,i) {
 				if(!(d.key[0] in cumulate))
 					cumulate[d.key[0]] = d.value;
 				else
 					cumulate[d.key[0]] += d.value;
-				g.push({key:d.key,value:cumulate[d.key[0]],'in_day':d.value})
+				g.push({key:[d.key[0],parseDate(d.key[1])],value:cumulate[d.key[0]],'in_day':d.value})
 			});
+			
+		
 			return g;
 		}
 	};
-	let hourScale_situation = d3.scaleTime().domain(d3.extent(data,d=> d.situationDate_month))
+	let hourScale_situation = d3.scaleTime().domain(d3.extent(data,function(d){
+		let parseDate = d3.utcParse("%Y-%m-%d");
+		return parseDate(d.situationDate_month)
+	}))
 
 
 	lineChart_situation.width(w+170)
@@ -418,19 +409,21 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 				     .chart(function(c) { return new dc.LineChart(c); })
 				     .x(hourScale_situation)
 				     .brushOn(false)
-				     .yAxisLabel("Quantidade acumulada de estabelecimentos")
+				     .yAxisLabel("Qtd. de estabelecimentos")
 				     .xAxisLabel("Data da situação")
 				     .clipPadding(10)
 				     .elasticY(true)
 				     .dimension(dim_situation)
 				     .group(group_situation)
-				     .mouseZoomable(true)
+				     .mouseZoomable(false)
+				     .title(function(d) { return 'Situação: '+d.key[0]+'\nMês: ' + d.key[1].toLocaleDateString().substr(3)+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
 				     .seriesAccessor(function(d) { return d.key[0];})
 				     .keyAccessor(function(d) {return d.key[1];})
 				     .valueAccessor(function(d) { return +d.value;})
 				     .colors(colorScale)
 				     .on("filtered", function(chart,filter){
-					    createMap()
+				     	console.log(filter)
+					    createMap();
 					})
 				     .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
 				     .xAxis().ticks(5);
@@ -452,7 +445,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 
      rowChartQ2.width(window.innerWidth)
-		.height(h-100)
+		.height(h-110)
 		.dimension(dim_atividades)
 		.group(group_atividades)
 		.x(scaleAtividades)
@@ -467,6 +460,16 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 			createMap()
 		});
 
-  dc.renderAll()
+  dc.renderAll();
+  function AddXAxis(chartToUpdate, displayText){
+	    chartToUpdate.svg()
+	                .append("text")
+	                .attr("class", "x-axis-label")
+	                .attr("text-anchor", "middle")
+	                .attr("x", chartToUpdate.width()/2)
+	                .attr("y", chartToUpdate.height()-1.5)
+	                .text(displayText);
+	}
+AddXAxis(rowChartQ2, "Qtd. de estabelecimentos");
   return data;
 });

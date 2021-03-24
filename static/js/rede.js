@@ -1,6 +1,7 @@
 // const  path_socios = path_data+"socios.csv";
 
 const  path_socios = path_data+"socios.csv";
+// const  path_socios = path_data+"socios_min.csv";
 var w = window.innerWidth;
 var h = window.innerHeight;
 
@@ -118,7 +119,6 @@ d3.csv(path_socios).then(function(data){
 			let edges_inverse_rep = g_inverse.get(d.representante);
 			edges_inverse_rep.push(d.partner);
 		}
-
 	});
 
 
@@ -133,7 +133,7 @@ d3.csv(path_socios).then(function(data){
 			s = new sigma({
 						  graph: component,
 						  renderer: {
-						    container: document.getElementById('Q4'),
+						    container: document.getElementById('rede'),
 						    type: 'canvas'
 						  },
 						  settings: {
