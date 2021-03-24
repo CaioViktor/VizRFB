@@ -1,7 +1,7 @@
 // const  path_socios = path_data+"socios.csv";
 
 const  path_socios = path_data+"socios.csv";
-var w = window.innerWidth-100;
+var w = window.innerWidth;
 var h = window.innerHeight;
 
 const size = 1;

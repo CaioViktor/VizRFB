@@ -1,38 +1,6 @@
-.chart_test{
-	height: 100%;
-	width: 100%;
-	min-height: 100%;
-	min-width: 100%;
-	display: block;
-	margin-left: 10px: 
+.container{
+	margin: 0;
 }
-
-#Q1{
-	position: absolute;
-	top: 0%;
-}
-#Q4{
-	position: absolute;
-	top: 0%;
-}
-#Q11{
-	position: absolute;
-	top: 100%;
-}
-#Q2{
-	position: absolute;
-	top: 500%;
-}
-#Q3{
-	position: absolute;
-	top: 300%;
-}
-
-#situacoes_linha{
-	position: absolute;
-	top: 400%;
-}
-
 .counties {
   fill: none;
 }
@@ -54,7 +22,9 @@
   border-radius: 10px;
   pointer-events: none;
 }
-
+.full{
+	width: 150%;
+}
 #tooltip.hidden {
   display: none;
 }
@@ -91,8 +61,9 @@
 	overflow:hidden;
 	width: fit-content;
 	position: absolute;
-	top: 0;
-	right: 0;
+	left: 700px;
+    top: 300px;
+
 }
 .info h4 {
 	margin: 0 0 5px;

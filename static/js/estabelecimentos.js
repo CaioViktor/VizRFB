@@ -2,8 +2,8 @@
 
 const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
-var w = window.innerWidth-100;
-var h = window.innerHeight/2;
+var w = 500;
+var h = 500;
 let mapa = null;
 let next,last;
 let colorScale_mapa = null;
@@ -16,22 +16,24 @@ let previous_filter = null;
 let previous_this_map = null;
 
 function renderMap(data,map){
-	const width = w;
-	const height = h*2;
+	const width = w-50;
+	const height = h;
 	const svg = d3.select("#Q1").append("svg");
 
 
 	var projection =  d3.geoMercator()
-					  .scale(600)
-					  .center([-52, -17]);
-	  // .translate([width / 2 + 18, height / 2 + 20]);
+					  // .scale(600)
+					  .scale(550)
+					  // .center([-52, -17]);
+					  .center([-25, -20]);
+	  				  // .translate([width / 2 + 18, height / 2 + 20]);
 
 	path = d3.geoPath().projection(projection);
 
 
 
-	svg.attr("width",w)
-		.attr("height",h);
+	svg.attr("width",width)
+		.attr("height",height);
 
 	svg.append("g")
 	  .attr("class", "states")
@@ -181,7 +183,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 		d.situationDate = parseDate(d.situationDate);
 	});
 	
-	let lineChartQ11 = dc.lineChart("#Q11_linechart");
+	let lineChartQ11 = dc.lineChart("#Q11");
 	let data_table = dc.dataTable("#table_estabs");
 	let barchart= dc.barChart("#Q3");
 	let lineChart_situation = dc.seriesChart("#situacoes_linha");
@@ -220,9 +222,9 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	};
 	let hourScale = d3.scaleTime().domain(d3.extent(data,d=> d.date_start_month))
 
-	lineChartQ11.width(w)
-            .height(h)
- 				.margins({left: 80, top: 20, right: 10, bottom: 40})
+	lineChartQ11.width(w+170)
+            .height(h/2)
+ 				// .margins({left: 80, top: 20, right: 10, bottom: 40})
             .dimension(dim_date_start)
             .group(group_date_start)
             .x(hourScale)
@@ -276,8 +278,8 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                  .domain(["Ativa","Baixada","Inapta","Nula","Suspensa"])
                  .range(["#4daf4a", "#e41a1c", "#984ea3","#377eb8","#0dfeb9"])
 
-    barchart.width(768)
-                .height(480)
+    barchart.width(w)
+                .height(h)
                 .x(d3.scaleLinear().domain([1, 21]))
                 .margins({left: 80, top: 20, right: 10, bottom: 40})
                 .brushOn(false)
@@ -411,8 +413,8 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	let hourScale_situation = d3.scaleTime().domain(d3.extent(data,d=> d.situationDate_month))
 
 
-	lineChart_situation.width(w)
-				     .height(h)
+	lineChart_situation.width(w+170)
+				     .height(h/2)
 				     .chart(function(c) { return new dc.LineChart(c); })
 				     .x(hourScale_situation)
 				     .brushOn(false)
@@ -449,13 +451,13 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
      rowChartQ2.ordering(function(d){return -d.value});
 
 
-     rowChartQ2.width(w)
-		.height(h)
+     rowChartQ2.width(window.innerWidth)
+		.height(h-100)
 		.dimension(dim_atividades)
 		.group(group_atividades)
 		.x(scaleAtividades)
 		// .label(function(d){return d.key;})
-		.margins({top: 50, right: 50, bottom: 25, left: 40})
+		// .margins({top: 50, right: 50, bottom: 25, left: 40})
 		.elasticX(true)
 		.valueAccessor(function(d) { return +d.value;})
 		.othersGrouper(false)

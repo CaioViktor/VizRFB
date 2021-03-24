@@ -22,37 +22,45 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-	<div class="chart_test" id="Q1">d</div>
-	<div class="chart_test" id="Q11">
+	<main role="main" class="container">
+		<div class="row full">
+	      <h3> Relatório sobre estabelecimentos</h3>
+	    </div>
+	    <div class='row full'>
+	    	<div class="col-4">
+				<div id="Q11"></div>
+				<div id="situacoes_linha"></div>
+	    	</div>
+	    	<div id="Q1" class="col-4"></div>
+			<div id="Q3" class="col-4"></div>
+		</div>
+		<div class='row full'>
+			<div id="Q2" class="col"></div>
+		</div>
+	    <div class='row full'>
+	    	<div id="paging">
+		        Showing <span id="begin"></span>-<span id="end"></span> of <span id="size"></span> <span id="totalsize"></span>
+		        <input id="last" class="btn" type="Button" value="Last" onclick="javascript:last()" />
+		        <input id="next" class="btn" type="button" value="Next" onclick="javascript:next()"/>
+		     </div>
+			<table class="table table-hover" id="table_estabs">
+		        <thead>
+		            <tr class="header">
+		                <th>CNPJ Raiz</th>
+		                <th>CNPJ</th>
+		                <th>Nome</th>
+		                <th>Porte</th>
+		                <th>Início das atividades</th>
+		                <th>Sitação</th>
+		                <th>Data da situação</th>
+		                <th>Unidade Federativa</th>
+		                <th>Atividade econômica</th>
+		            </tr>
+		        </thead>
+	    	</table>
+	    </div>
+	</main>
 
-		<div id="Q11_linechart"></div>
-		<div id="paging">
-	        Showing <span id="begin"></span>-<span id="end"></span> of <span id="size"></span> <span id="totalsize"></span>
-	        <input id="last" class="btn" type="Button" value="Last" onclick="javascript:last()" />
-	        <input id="next" class="btn" type="button" value="Next" onclick="javascript:next()"/>
-	     </div>
-		<table class="table table-hover" id="table_estabs">
-        <thead>
-            <tr class="header">
-                <th>CNPJ Raiz</th>
-                <th>CNPJ</th>
-                <th>Nome</th>
-                <th>Porte</th>
-                <th>Início das atividades</th>
-                <th>Sitação</th>
-                <th>Data da situação</th>
-                <th>Unidade Federativa</th>
-                <th>Atividade econômica</th>
-            </tr>
-        </thead>
-    	</table>
-	</div>
-	<div class="chart_test" id="Q2">d</div>
-	<div class="chart_test" id="Q3">d</div>
-	<div class="chart_test" id="id_table">
-	<div class="chart_test" id="situacoes_linha">
-    </table>
-	</div>
 
 <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script> -->
 <script type="text/javascript" src="static/js/bootstrap.js"></script>
