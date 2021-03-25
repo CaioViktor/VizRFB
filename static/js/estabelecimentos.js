@@ -1,6 +1,6 @@
-const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = 500;
 var h = 500;
@@ -35,7 +35,6 @@ function renderMap(data,maps){
 
 	svg.attr("width",width)
 		.attr("height",height);
-	//TODO: Calcular cor para taxa de 100.000 habitantes usar campo "popula"
 	svg.append("g")
 	  .attr("class", "states")
 	.selectAll("path")
@@ -385,7 +384,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
             .height(h)
             .dimension(dim_cnpj)
             .size(Infinity)
-            .columns([d=>"<a title='Ver rede de sócios' href='/rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
+            .columns([d=>"<a title='Ver rede de sócios' href='rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
             .sortBy(d=>d.root_cnpj)
             .order(d3.ascending)
             .on('preRender', update_offset)
