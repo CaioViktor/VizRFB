@@ -1,6 +1,6 @@
-// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = 500;
 var h = 500;
@@ -206,6 +206,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	let barchart= dc.barChart("#Q3");
 	let lineChart_situation = dc.seriesChart("#situacoes_linha");
 	let rowChartQ2 = dc.rowChart("#Q2");
+	let selectFilter_situation = dc.selectMenu("#filter_situa");
 
 
 	facts = crossfilter(data);
@@ -330,10 +331,10 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                 barchart.stack(group_porte_situacao, '' + situacoes[i], sel_stack(situacoes[i]));
 	}
 
-    let dim_cnpj = facts.dimension(d=>d.cnpj_est);
-
+	console.log(barchart)
 
     //Datatable
+    let dim_cnpj = facts.dimension(d=>d.cnpj_est);
     var ofs = 0, pag = 17;
 
 	function update_offset() {
@@ -385,7 +386,6 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
             .dimension(dim_cnpj)
             .size(Infinity)
             .columns([d=>"<a title='Ver rede de sócios' href='/rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
-            // .columns(["root_cnpj"])
             .sortBy(d=>d.root_cnpj)
             .order(d3.ascending)
             .on('preRender', update_offset)
@@ -480,6 +480,21 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 		.on("filtered", function(chart,filter){
 			createMap()
 		});
+
+
+
+
+
+		//Filter situation
+		let dim_situation_filter = facts.dimension(d=>d.situation);
+		selectFilter_situation.dimension(dim_situation_filter)
+				.group(dim_situation_filter.group())
+				.multiple(true)
+				.numberVisible(5)
+				.controlsUseVisibility(true)
+				.on("filtered", function(chart,filter){
+			        createMap()
+				});
 
   dc.renderAll();
   function AddXAxis(chartToUpdate, displayText){

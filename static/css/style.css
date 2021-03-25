@@ -94,3 +94,9 @@
 	margin-right: 8px;
 	
 }
+
+#filter_situa{
+	position: absolute;
+	top: 0%;
+	right: 0%;
+}
