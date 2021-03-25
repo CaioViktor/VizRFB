@@ -1,6 +1,6 @@
-// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = 500;
 var h = 500;
@@ -8,6 +8,7 @@ let mapa = null;
 let next,last;
 let colorScale_mapa = null;
 let state_name_mapa = new Map();
+let state_population = new Map();
 let format = d3.format(".2f");
 let facts = null;
 let brazil = null;
@@ -15,7 +16,7 @@ let dim_states = null;
 let previous_filter = null;
 let previous_this_map = null;
 
-function renderMap(data,map){
+function renderMap(data,maps){
 	const width = w-50;
 	const height = h;
 	const svg = d3.select("#Q1").append("svg");
@@ -25,7 +26,7 @@ function renderMap(data,map){
 					  // .scale(600)
 					  .scale(550)
 					  // .center([-52, -17]);
-					  .center([-25, -20]);
+					  .center([-30, -20]);
 	  				  // .translate([width / 2 + 18, height / 2 + 20]);
 
 	path = d3.geoPath().projection(projection);
@@ -40,7 +41,7 @@ function renderMap(data,map){
 	.selectAll("path")
 	  .data(topojson.feature(data, data.objects.estados).features)
 	.enter().append("path")
-	  .attr("fill", d => colorScale_mapa(map.get(d.id)))
+	  .attr("fill", d => colorScale_mapa(maps[1].get(d.id)))
 	  // .attr("fill", "blue")
 	  .attr("d", path)
 	  .attr("element_id",d=>d.id)
@@ -72,7 +73,7 @@ function renderMap(data,map){
 	    .attr("stroke","#FFF5B1");
 	    
 	    const rect = this.getBoundingClientRect();
-	    showTooltip(map,this.getAttribute("element_id"), rect.x, rect.y);
+	    showTooltip(maps,this.getAttribute("element_id"), rect.x, rect.y);
 	  })
 	.on("mouseout", function(d){
 
@@ -85,7 +86,7 @@ function renderMap(data,map){
 			    .attr("stroke-width", 3)
 			    .attr("stroke","red");
 		}
-	    hideTooltip(map);
+	    hideTooltip(maps);
 	});
 
 	svg.append("path")
@@ -98,7 +99,7 @@ function renderMap(data,map){
 	      .attr("id","tooltip")
 	      .attr("class","hidden")
 	      .append("p")
-	      .html("<h4 id='name_county'></h4>Quantidade de estabelecimentos: <span id='taxa'></span>")
+	      .html("<h4 id='name_county'></h4>Quantidade de estabelecimentos: <span id='qtd'></span><br/>População: <span id='pop'></span><br/>Taxa de estabelecimentos para 100.000 habitantes: <b><span id='taxa'></span></b>")
 
 	// Once we append the vis elments to it, we return the DOM element for Observable to display above.
 	return svg.node()
@@ -106,15 +107,19 @@ function renderMap(data,map){
 
 function update_countStates(group){
 	let map = new Map();
+	let map_100000 = new Map();
 	let states = group.all();
 	states.forEach(function(d){
 		map.set(d.key,+d.value);
+		const population = state_population.get(d.key);
+		const to_100000 = (d.value * 100000)/population;
+		map_100000.set(d.key,to_100000);
 	});
-	return map;
+	
+	return [map,map_100000];
 }
 
 function createLegend(color_scheme){
-		
 	let div = document.createElement('div');
 	let labels = [],from, to;
 	$(div).addClass('info legend');
@@ -126,19 +131,21 @@ function createLegend(color_scheme){
         let fromto = colorScale_mapa.invertExtent(c);
 		labels.push(
 			'<i style="background:' + color_scheme[i] + '"></i> ' +
-			d3.format("d")(fromto[0]) + (d3.format("d")(fromto[1]) ? '&ndash;' + d3.format("d")(fromto[1]) : '+'));
+			d3.format(".3f")(fromto[0]) + (d3.format(".3f")(fromto[1]) ? '&ndash;' + d3.format(".3f")(fromto[1]) : '+'));
 	}
 
-	div.innerHTML = labels.join('<br>')
+	div.innerHTML = "<b>Para 100.000 habitantes</b><br/>"+labels.join('<br>')
 	
   	$("#Q1").append(div);
 }
 
-function showTooltip(map,element_id, x, y) {
+function showTooltip(maps,element_id, x, y) {
 	const offset = 10;
 	const t = d3.select("#tooltip");
 	
-	t.select("#taxa").text(map.get(element_id));
+	t.select("#qtd").text(maps[0].get(element_id));
+	t.select("#pop").text(state_population.get(element_id));
+	t.select("#taxa").text(maps[1].get(element_id));
 	t.select("#name_county").text(state_name_mapa.get(element_id));
 	t.classed("hidden", false);
 	const rect = t.node().getBoundingClientRect();
@@ -163,13 +170,24 @@ function createMap(){
 	$("#Q1").empty();
 	dim_states = facts.dimension(d => d.state);
 	let group_states = dim_states.group();
-	let map = update_countStates(group_states);
-	const domain = [group_states.top(group_states.size())[group_states.size()-1].value,group_states.top(1)[0].value];
+	const maps = update_countStates(group_states);
+	// const domain = [group_states.top(group_states.size())[group_states.size()-1].value,group_states.top(1)[0].value];
+	//aqui
+	let min= Number.MAX_VALUE, max = Number.MIN_VALUE;
+	maps[1].forEach(function(d){
+		if(d > max)
+			max = d;
+		if(d < min)
+			min = d;
+	});
+	const domain = [min,max];
+	//aqui
 	const color_scheme = d3.schemeGreens[7];
+	const values_variation = domain[1] - domain[0];
 	colorScale_mapa = d3.scaleQuantile()
-		                .domain([domain[0],domain[0] + 20 * 1,domain[0] + 20 * 2,domain[0] + 20 * 3,domain[0] + 20 * 4,domain[0] + 20 * 5,domain[1]])
+		                .domain([domain[0],domain[0] + (values_variation * 0.05),domain[0] + (values_variation * 0.1),domain[0] + (values_variation * 0.30),domain[0] + (values_variation * 0.5),domain[0] + (values_variation * 0.7),domain[1]])
 		                .range(color_scheme);
-	mapa = renderMap(brazil,map);
+	mapa = renderMap(brazil,maps);
 	createLegend(color_scheme);
 }
 
@@ -200,6 +218,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 		const features = topojson.feature(data2, data2.objects.estados).features;
 		features.forEach(function(d){
 			state_name_mapa.set(d.id,d.properties.nome);
+			state_population.set(d.id,d.properties.popula);
 		});
 		brazil = data2;
 		createMap();
