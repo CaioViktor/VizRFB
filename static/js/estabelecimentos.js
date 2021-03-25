@@ -365,6 +365,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	  }else{
 	    d3.select('#totalsize').text('');
 	  }
+
 	}
 
 	next=function(){
@@ -382,8 +383,9 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
     data_table.width(w)
             .height(h)
             .dimension(dim_cnpj)
-            .size(pag)
+            .size(Infinity)
             .columns([d=>"<a title='Ver rede de sócios' href='/rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
+            // .columns(["root_cnpj"])
             .sortBy(d=>d.root_cnpj)
             .order(d3.ascending)
             .on('preRender', update_offset)
