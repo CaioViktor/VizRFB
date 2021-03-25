@@ -26,12 +26,12 @@ function getComponent(id){
 		if(g.has(current_id)){
 			let neighbors = g.get(current_id);
 			visited_list.push(current_id);
-			let node = {'id':current_id,'label':current_id,'x':0,'y':0,'color':colorScale("Jurídico"),'size':size};
+			let node = {'id':current_id,'label':current_id.split("-")[1].split(" ")[0],'x':0,'y':0,'color':colorScale("Jurídico"),'size':size};
 			nodes.push(node);
 			neighbors.forEach(function(d){
 				if(d[2] == "Físico" || d[2] == "Estrangeiro"){
 					if(!visited_list.includes(d[1])){
-						let neighbor = {'id':d[1],'label':d[1],'x':0,'y':0,'color':colorScale(d[2]),'size':size};
+						let neighbor = {'id':d[1],'label':d[1].split("-")[1].split(" ")[0],'x':0,'y':0,'color':colorScale(d[2]),'size':size};
 						nodes.push(neighbor);
 						visited_list.push(d[1]);
 
@@ -56,7 +56,7 @@ function getComponent(id){
 				count_edges+= 1;
 				if (d[3] != ""){
 					if(!visited_list.includes(d[3])){
-						let representant = {'id':d[3],'label':d[3],'x':0,'y':0,'color':colorScale("Físico"),'size':size};
+						let representant = {'id':d[3],'label':d[3].split("-")[1].split(" ")[0],'x':0,'y':0,'color':colorScale("Físico"),'size':size};
 						nodes.push(representant);
 						visited_list.push(d[3]);
 
@@ -137,19 +137,27 @@ d3.csv(path_socios).then(function(data){
 						    type: 'canvas'
 						  },
 						  settings: {
-						  	edgeLabelSize: 'proportional',
+						  	edgeLabelSize: 'fixed',
 						  	enableEdgeHovering: true,
 						    edgeHoverColor: 'edge',
 						    defaultEdgeHoverColor: '#f00',
 						    edgeHoverSizeRatio: 2,
 						    edgeHoverExtremities: true,
 						    maxNodeSize: 20,
-						    maxEdgeSize: 3
+						    maxEdgeSize: 3,
+						    defaultEdgeLabelSize: 16
 
 						  }
 					});
 			// Start the ForceAtlas2 algorithm:
-
+			s.bind('overNode', function(e) {
+				e.data.node.label = e.data.node.id;
+				e.target.refresh();
+			});
+			s.bind('outNode', function(e) {
+				e.data.node.label = e.data.node.id.split("-")[1].split(" ")[0];
+				e.target.refresh();
+			});
 			s.startForceAtlas2({worker: true, barnesHutOptimize: false});
 			window.setTimeout(function() {s.killForceAtlas2()}, 2000);
 		}else{

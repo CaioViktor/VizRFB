@@ -1,6 +1,6 @@
-const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = 500;
 var h = 500;
@@ -115,7 +115,7 @@ function update_countStates(group){
 		const to_100000 = (d.value * 100000)/population;
 		map_100000.set(d.key,to_100000);
 	});
-	
+
 	return [map,map_100000];
 }
 
@@ -383,7 +383,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
             .height(h)
             .dimension(dim_cnpj)
             .size(pag)
-            .columns([d=>d.root_cnpj,d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
+            .columns([d=>"<a title='Ver rede de sócios' href='/rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
             .sortBy(d=>d.root_cnpj)
             .order(d3.ascending)
             .on('preRender', update_offset)
