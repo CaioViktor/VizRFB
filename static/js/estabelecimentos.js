@@ -2,8 +2,10 @@ const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
 // const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
-var w = 500;
-var h = 500;
+var w = window.innerWidth;
+var h = window.innerHeight;
+var colh = h/2;
+var colw = (33/100) * w;
 let mapa = null;
 let next,last;
 let colorScale_mapa = null;
@@ -17,24 +19,26 @@ let previous_filter = null;
 let previous_this_map = null;
 
 function renderMap(data,maps){
-	const width = w-50;
-	const height = h;
 	const svg = d3.select("#Q1").append("svg");
 
 
+	const scaleValue = (colw*colh)*650/(633.6*474.5);
+	
+	
+
 	var projection =  d3.geoMercator()
-					  // .scale(600)
-					  .scale(550)
-					  // .center([-52, -17]);
-					  .center([-30, -20]);
-	  				  // .translate([width / 2 + 18, height / 2 + 20]);
+					  // .scale(scaleValue)
+					  // .center([center0, center1]);
+					  .scale(scaleValue)
+					  .center([-52, -15])
+  					  .translate([colw / 2, colh / 2]);
 
 	path = d3.geoPath().projection(projection);
 
 
 
-	svg.attr("width",width)
-		.attr("height",height);
+	svg.attr("width",colw)
+		.attr("height",colh);
 	svg.append("g")
 	  .attr("class", "states")
 	.selectAll("path")
@@ -134,7 +138,19 @@ function createLegend(color_scheme){
 	}
 
 	div.innerHTML = "<b>Para 100.000 habitantes</b><br/>"+labels.join('<br>')
-	
+	const left =  (w*680)/1920;
+	const top = (h*270)/949;
+	$(div).css("position","absolute");
+	$(div).css("left",left+"px");
+	$(div).css("top",top+"px");
+	if(w < 1200 || h < 640){
+		const sw = w/1920;
+		const sh = h/949;
+		$(div).css("transform","scale("+sw+","+ sh+")")
+	}
+	// position: absolute;
+	// left: 680px;
+ //    top: 270px;
   	$("#Q1").append(div);
 }
 
@@ -241,8 +257,8 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	};
 	let hourScale = d3.scaleTime().domain(d3.extent(data,d=> d.date_start_month))
 
-	lineChartQ11.width(w+170)
-            .height(h/2)
+	lineChartQ11.width(colw)
+            .height(colh/2)
  				// .margins({left: 80, top: 20, right: 10, bottom: 40})
             .dimension(dim_date_start)
             .group(group_date_start)
@@ -297,8 +313,10 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                  .domain(["Ativa","Baixada","Inapta","Nula","Suspensa"])
                  .range(["#4daf4a", "#e41a1c", "#984ea3","#377eb8","#0dfeb9"])
 
-    barchart.width(w)
-                .height(h)
+   
+ 
+    barchart.width(colw)
+                .height(colh)
                 .x(d3.scaleLinear().domain([1, 21]))
                 .margins({left: 80, top: 20, right: 10, bottom: 40})
                 .brushOn(false)
@@ -330,7 +348,6 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
                 barchart.stack(group_porte_situacao, '' + situacoes[i], sel_stack(situacoes[i]));
 	}
 
-	console.log(barchart)
 
     //Datatable
     let dim_cnpj = facts.dimension(d=>d.cnpj_est);
@@ -424,8 +441,9 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	}))
 
 
-	lineChart_situation.width(w+170)
-				     .height(h/2)
+
+	lineChart_situation.width(colw)
+				     .height(colh/2)
 				     .chart(function(c) { return new dc.LineChart(c); })
 				     .x(hourScale_situation)
 				     .brushOn(false)
@@ -442,7 +460,6 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 				     .valueAccessor(function(d) { return +d.value;})
 				     .colors(colorScale)
 				     .on("filtered", function(chart,filter){
-				     	console.log(filter)
 					    createMap();
 					})
 				     .legend(dc.legend().x(250).y(0).itemHeight(13).gap(5))
@@ -465,7 +482,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 
      rowChartQ2.width(window.innerWidth)
-		.height(h-110)
+		.height(colh-60)
 		.dimension(dim_atividades)
 		.group(group_atividades)
 		.x(scaleAtividades)

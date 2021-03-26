@@ -27,9 +27,7 @@
   border-radius: 10px;
   pointer-events: none;
 }
-.full{
-	width: 100%;
-}
+
 #tooltip.hidden {
   display: none;
 }
@@ -71,10 +69,6 @@
 	border-radius: 5px;
 	overflow:hidden;
 	width: fit-content;
-	position: absolute;
-	left: 680px;
-    top: 270px;
-
 }
 .info h4 {
 	margin: 0 0 5px;
