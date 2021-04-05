@@ -1,6 +1,6 @@
-const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = window.innerWidth;
 var h = window.innerHeight;
@@ -15,8 +15,18 @@ let format = d3.format(".2f");
 let facts = null;
 let brazil = null;
 let dim_states = null;
+let group_states = null;
 let previous_filter = null;
-let previous_this_map = null;
+// let previous_this_map = null;
+let resetar = null;
+
+function clickFilter(el){
+	var df = $("#d"+el.id)[0];
+	if(df.style.display != "inline")
+		df.style.display = "inline";
+	else
+		df.style.display = "none";
+}
 
 function renderMap(data,maps){
 	const svg = d3.select("#Q1").append("svg");
@@ -58,8 +68,9 @@ function renderMap(data,maps){
 				    .attr("stroke-width", 0)
 	    			.attr("stroke","none"); //volta ao valor padrão
 	  			clicked_state = null;
-	  			previous_this_map = null;
+	  			// previous_this_map = null;
 	  		}else{
+	  			let previous_this_map = $("[element_id="+previous_filter+"]")[0];
 	  			d3.select(previous_this_map) // seleciona o elemento atual
 			    .attr("stroke-width", 0)
 	    		.attr("stroke","none"); //volta ao valor padrão
@@ -67,7 +78,7 @@ function renderMap(data,maps){
 	  		dim_states.filterExact(clicked_state);
 	  		dc.renderAll();
 	  		previous_filter = clicked_state;
-	  		previous_this_map = this;
+	  		// previous_this_map = this;
 	  })
 	  .on("mouseover", function(d){
 	    d3.select(this) // seleciona o elemento atual
@@ -85,6 +96,7 @@ function renderMap(data,maps){
 	    .attr("stroke-width", 0)
 	    .attr("stroke","none"); //volta ao valor padrão
 	    if(previous_filter != null){
+	    	let previous_this_map = $("[element_id="+previous_filter+"]")[0];
 			d3.select(previous_this_map) // seleciona o elemento atual
 			    .attr("stroke-width", 3)
 			    .attr("stroke","red");
@@ -105,6 +117,12 @@ function renderMap(data,maps){
 	      .html("<h4 id='name_county'></h4>Quantidade de estabelecimentos: <span id='qtd'></span><br/>População: <span id='pop'></span><br/>Taxa de estabelecimentos para 100.000 habitantes: <b><span id='taxa'></span></b>")
 
 	// Once we append the vis elments to it, we return the DOM element for Observable to display above.
+	if(previous_filter!=null){
+		let previous_this_map = $("[element_id="+previous_filter+"]")[0];
+		d3.select(previous_this_map) // seleciona o elemento atual
+			    .attr("stroke-width", 3)
+			    .attr("stroke","red");
+	}
 	return svg.node()
 }
 
@@ -183,8 +201,7 @@ function hideTooltip(map){
 
 function createMap(){
 	$("#Q1").empty();
-	dim_states = facts.dimension(d => d.state);
-	let group_states = dim_states.group();
+	
 	const maps = update_countStates(group_states);
 	// const domain = [group_states.top(group_states.size())[group_states.size()-1].value,group_states.top(1)[0].value];
 	//aqui
@@ -222,11 +239,30 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	let lineChart_situation = dc.seriesChart("#situacoes_linha");
 	let rowChartQ2 = dc.rowChart("#Q2");
 	let selectFilter_situation = dc.selectMenu("#filter_situa");
+	let lineChartQ11Filter = dc.lineChart("#Q11F");
+
+	resetar = function(){
+		if(previous_filter != null){
+			let filtered_state = $("[element_id="+previous_filter+"]")[0];
+			filtered_state.dispatchEvent(new Event('click'));
+		}
+		lineChartQ11.filterAll();
+		data_table.filterAll();
+		barchart.filterAll();
+		lineChart_situation.filterAll();
+		rowChartQ2.filterAll();
+		selectFilter_situation.filterAll();
+		lineChartQ11Filter.filterAll();
+		dc.renderAll();
+	};
 
 
 	facts = crossfilter(data);
 
 
+	//Map dim e group
+	dim_states = facts.dimension(d => d.state);
+	group_states = dim_states.group();
 
 	//Q1
 	d3.json(path_brazil).then(function(data2){
@@ -271,6 +307,39 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	        .title(function(d) { return 'Mês: ' + d.key.toLocaleDateString().substr(3)+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
             .brushOn(false)
             .mouseZoomable(true)
+            .on("filtered", function(chart,filter){
+			        createMap()
+			});
+
+			console.log(lineChartQ11);
+
+    let dim_date_start_filter = facts.dimension(d=>d.date_start_month);
+    let _group_f = dim_date_start.group().reduceSum(function(d){return 1});
+    var group_date_start_filter = {
+		all:function () {
+			var cumulate = 0;
+			var g = [];
+			_group_f.all().forEach(function(d,i) {
+				cumulate += d.value;
+				g.push({key:d.key,value:cumulate,'in_day':d.value})
+			});
+			return g;
+		}
+	};
+	lineChartQ11Filter.width(colw/2)
+            .height(colh/3)
+ 				// .margins({left: 80, top: 20, right: 10, bottom: 40})
+            .dimension(dim_date_start_filter)
+            .group(group_date_start_filter)
+            .x(hourScale)
+            .renderArea(true)
+            // .yAxisLabel("Qtd. de estabelecimentos")
+	        .xAxisLabel("Ano de início das atividades")
+	        .clipPadding(10)
+	        // .elasticY(true)
+	        // .title(function(d) { return 'Mês: ' + d.key.toLocaleDateString().substr(3)+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
+            .brushOn(true)
+            .mouseZoomable(false)
             .on("filtered", function(chart,filter){
 			        createMap()
 			});
