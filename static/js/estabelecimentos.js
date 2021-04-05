@@ -1,6 +1,6 @@
-// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = window.innerWidth;
 var h = window.innerHeight;
