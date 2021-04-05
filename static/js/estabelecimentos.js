@@ -1,6 +1,6 @@
-const  path_estabelecimentos = path_data+"estabelecimentos.csv";
+// const  path_estabelecimentos = path_data+"estabelecimentos.csv";
 
-// const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
+const  path_estabelecimentos = path_data+"estabelecimentos_min.csv";
 const  path_brazil = path_data+"brazil.json";
 var w = window.innerWidth;
 var h = window.innerHeight;
@@ -295,7 +295,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 	lineChartQ11.width(colw)
             .height(colh/2)
- 				// .margins({left: 80, top: 20, right: 10, bottom: 40})
+ 				.margins({left: 50, top: 5, right: 5, bottom: 30})
             .dimension(dim_date_start)
             .group(group_date_start)
             .x(hourScale)
@@ -314,21 +314,10 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 			console.log(lineChartQ11);
 
     let dim_date_start_filter = facts.dimension(d=>d.date_start_month);
-    let _group_f = dim_date_start.group().reduceSum(function(d){return 1});
-    var group_date_start_filter = {
-		all:function () {
-			var cumulate = 0;
-			var g = [];
-			_group_f.all().forEach(function(d,i) {
-				cumulate += d.value;
-				g.push({key:d.key,value:cumulate,'in_day':d.value})
-			});
-			return g;
-		}
-	};
+    let group_date_start_filter = dim_date_start.group();
 	lineChartQ11Filter.width(colw/2)
             .height(colh/3)
- 				// .margins({left: 80, top: 20, right: 10, bottom: 40})
+ 				// .margins({left: 40, top: 20, right: 10, bottom: 40})
             .dimension(dim_date_start_filter)
             .group(group_date_start_filter)
             .x(hourScale)
@@ -339,10 +328,12 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	        // .elasticY(true)
 	        // .title(function(d) { return 'Mês: ' + d.key.toLocaleDateString().substr(3)+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
             .brushOn(true)
-            .mouseZoomable(false)
+            .mouseZoomable(true)
             .on("filtered", function(chart,filter){
 			        createMap()
-			});
+			})
+			.xAxis().ticks(5);
+			lineChartQ11Filter.yAxis().ticks(0);
 
 
 
@@ -513,6 +504,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 	lineChart_situation.width(colw)
 				     .height(colh/2)
+				     .margins({left: 50, top: 5, right: 5, bottom: 30})
 				     .chart(function(c) { return new dc.LineChart(c); })
 				     .x(hourScale_situation)
 				     .brushOn(false)
@@ -551,7 +543,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
 
      rowChartQ2.width(window.innerWidth)
-		.height(colh-60)
+		.height(colh-100)
 		.dimension(dim_atividades)
 		.group(group_atividades)
 		.x(scaleAtividades)

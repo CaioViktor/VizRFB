@@ -22,28 +22,28 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-	<div class="container-fluid">
-		<div class="row">
-	      <h3> Relatório sobre estabelecimentos</h3>
-	    </div>
+	<div id="main" class="container-fluid">
 	    <div class='row'>
 	    	<div class="col-4">
-				<div id="Q11"></div>
-				<div id="situacoes_linha"></div>
+				<div id="Q11"><b>Acumulado de estabelecimentos abertos ao longo do tempo</b></div>
+				<div id="situacoes_linha"><b>Acumulado de estabelecimentos por situação cadastral ao longo do tempo</b></div>
 	    	</div>
-	    	<div id="Q1" class="col-4"></div>
-			<div id="Q3" class="col-4"></div>
+	    	<div class="col-4"><b>Taxa de estabelecimentos por 100.000 habitantes por estado</b>
+	    		<div id="Q1"></div>
+	    	</div>
+			<div id="Q3" class="col-4"><b>Qtd. de estabelecimentos de cada situação cadastral por porte</b></div>
 			<!-- <div id="filter_situa"></div> -->
 
 		</div>
 		<div class='row'>
-			<div id="Q2" class="col"></div>
+			<div id="Q2" class="col"><b>10 principais atividade econômicas executadas por estabelecimentos</b></div>
 		</div>
 	    <div class='row'>
+	    	<div></div><h3>Dados selecionados</h3><br/></div>
 	    	<div id="paging">
-		        Showing <span id="begin"></span>-<span id="end"></span> of <span id="size"></span> <span id="totalsize"></span>
-		        <input id="last" class="btn" type="Button" value="Last" onclick="javascript:last()" />
-		        <input id="next" class="btn" type="button" value="Next" onclick="javascript:next()"/>
+		        Mostrando <span id="begin"></span>-<span id="end"></span> de <span id="size"></span> <span id="totalsize"></span>
+		        <input id="last" class="btn" type="Button" value="Anterior" onclick="javascript:last()" />
+		        <input id="next" class="btn" type="button" value="Próximo" onclick="javascript:next()"/>
 		     </div>
 			<table class="table table-hover" id="table_estabs">
 		        <thead>
@@ -68,8 +68,14 @@
     	</span>
     	<div id="f1" class="filtro_buttom" onclick="clickFilter(this);"><img src="static/images/filter.png" title="Configurar filtros"></div>
 		<div id="df1" class = "filtro">
-			<div id="Q11F"></div>
-			<div id="filter_situa">Situação cadastral:</div>
+			<div class="filter_item">
+				<span><b>Filtrar pelo ano de início das atividades:</b></span>
+				<div id="Q11F"></div>
+			</div>
+			<div class="filter_item">
+				<span><b>Filtrar pela situação cadastral:</b></span>
+				<div id="filter_situa"></div>
+			</div>
 			<!-- <div id="select9">Cargo:</div> -->
 		</div>
 	</div>
