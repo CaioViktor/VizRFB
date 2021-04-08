@@ -328,7 +328,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 	        // .elasticY(true)
 	        // .title(function(d) { return 'Mês: ' + d.key.toLocaleDateString().substr(3)+'\nAcumulado: '+ d.value+'\nNo mês: '+d.in_day; })
             .brushOn(true)
-            .mouseZoomable(true)
+            .mouseZoomable(false)
             .on("filtered", function(chart,filter){
 			        createMap()
 			})
@@ -371,7 +371,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
     let colorScale = d3.scaleOrdinal()
                  .domain(["Ativa","Baixada","Inapta","Nula","Suspensa"])
-                 .range(["#4daf4a", "#e41a1c", "#984ea3","#377eb8","#0dfeb9"])
+                 .range(["#8dd3c7", "#fb8072", "#e0e004","#80b1d3","#bebada"])
 
    
  
@@ -568,6 +568,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 				.group(dim_situation_filter.group())
 				.multiple(true)
 				.numberVisible(5)
+				// .mouseZoomable(false)
 				.controlsUseVisibility(true)
 				.on("filtered", function(chart,filter){
 			        createMap()
