@@ -411,7 +411,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 
     //Datatable
     let dim_cnpj = facts.dimension(d=>d.cnpj_est);
-    var ofs = 0, pag = 17;
+    var ofs = 0, pag = 100;
 
 	function update_offset() {
 	  var totFilteredRecs = facts.groupAll().value();
