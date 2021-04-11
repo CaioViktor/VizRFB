@@ -165,3 +165,7 @@
 #main{
 	margin-top: 10px;
 }
+
+.dc-chart g.row text {
+	fill: black;
+}
