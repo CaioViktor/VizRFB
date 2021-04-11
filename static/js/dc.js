@@ -3227,7 +3227,7 @@
 
           this._cap = Infinity;
           this._takeFront = true;
-          this._othersLabel = 'Others';
+          this._othersLabel = 'Outros';
 
           this._othersGrouper = (topItems, restItems) => {
               const restItemsSum = d3Array.sum(restItems, this.valueAccessor()),
