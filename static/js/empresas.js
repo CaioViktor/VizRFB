@@ -9,8 +9,6 @@ const height = 600
 
 let margin = {top: 40, right: 40, bottom: 40, left: 40};
 
-const svgwidth = 1200 - margin.left - margin.right
-const svgheight = 400 - margin.top - margin.bottom
 
 var w = window.innerWidth;
 var h = window.innerHeight;
@@ -29,8 +27,8 @@ let state_population = new Map();
 let facts = null;
 let previous_filter = null;
 
-var tabela = new dc.DataTable("#tabela");
-var chartQ8 = new dc.SeriesChart("#Q8");
+var tabela = new dc.DataTable("#tabelaempresa");
+var chartQ8 = new dc.ScatterPlot("#Q8");
 var chartQ7 = new dc.PieChart("#Q7");
 
 var runDimension, runGroup;
@@ -43,7 +41,7 @@ function renderMap(data,maps){
   const svg = d3.select("#Q12").append("svg");
 
 
-  const scaleValue = (colw*colh)*750/(633.6*474.5);
+  const scaleValue = (colw*colh)*650/(633.6*474.5);
   
   
 
@@ -258,41 +256,40 @@ d3.json(path_brazil).then(function(data2){
   });
 
 // Q8
-  runDimension = facts.dimension(function(d) {return ['Capital', +d.quantidade_socios]; });
-  runGroup = runDimension.group().reduceSum(function(d) { return +d.total_capital; });
+  runDimension = facts.dimension(function(d) {return [+d.quantidade_socios, +d.total_capital]; });
+  runGroup = runDimension.group();
 
-  var symbolScale = d3.scaleOrdinal().range(d3.symbols);
-  var symbolAccessor = function(d) { return symbolScale(d.key[0]); };
+  var symbolScale = d3.scaleLinear().domain([0, 100]);
+ /* var symbolAccessor = function(d) { return symbolScale(d.key[0]); };
   var subChart = function(c) {
     return new dc.ScatterPlot(c)
         .symbol(symbolAccessor)
         .symbolSize(8)
         .highlightedSize(20)
   };
+*/
+  
 
-  chartQ8
-    .width(568)
-    .height(320)
-    .chart(subChart)
-    .x(d3.scaleLinear().domain([0,100]))
-    .brushOn(false)
-    .colors(['#000'])
-    .title(function(d) { return "Teste:" + d.total_capital })
-    .yAxisLabel("Capital Social")
-    .xAxisLabel("Quantidade de Sócios")
-    .clipPadding(10)
-    .elasticY(true)
-    .dimension(runDimension)
-    .group(runGroup)
-    .mouseZoomable(false)
-    .shareTitle(false) // allow default scatter title to work
-    .seriesAccessor(function(d) {return "Expt: " + d.key[0];})
-    .keyAccessor(function(d) {return +d.key[1];})
-    .valueAccessor(function(d) {return +d.value - 200;})
+
+    chartQ8.width((w / 3) * 1.0)
+    .height(h / 3)
+        .margins({top: 20, right: 20, bottom: 40, left: 30})
+        .x(symbolScale)
+        .brushOn(true)
+        .symbolSize(8)
+        .elasticY(true)
+        ._rangeBandPadding(1)
+        .clipPadding(10)
+        .yAxisLabel("Total Capital")
+        .xAxisLabel("Quantidade de Sócios")
+        .dimension(runDimension)
+        .group(runGroup)
+        .colors(['#000'])
+
     
 
 
-
+/*
  chartQ8.on("renderlet.chart", function(chart){
     chartQ8.selectAll('path.symbol').on('click',function(){alert("Teste");});
   });
@@ -305,7 +302,7 @@ chartQ8.on('pretransition', function(chart) {
     .on("filtered", function(chart,filter){
               createMap()
         });
-
+*/
  
 chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);});
   chartQ8.margins().left += 60;
@@ -324,21 +321,32 @@ chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);})
         return qtds});
 
   chartQ7
-    .width(568)
-    .height(310)
-    .slicesCap(6)
+    .width((w / 3) * 1.50)
+    .height(h / 3)
+    .slicesCap(8)
+
     .dimension(runDimension)
     .group(speedSumGroup)
-    .legend(dc.legend().highlightSelected(true))
-    .on('pretransition', function(chart) {
-        chartQ7.selectAll('text.pie-slice').text(function(d) {
-            return dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
-        })
-    })
+
+    .legend(dc.legend().itemHeight(13).gap(5).highlightSelected(true))
+   
     .on("filtered", function(chart,filter){
               createMap()
         });
 
+chartQ7.on('pretransition', function(chart) {
+      chartQ7.selectAll('.dc-legend-item text')
+          .text('')
+        .append('tspan')
+          .text(function(d) { return d.name; })
+        .append('tspan')
+          .attr('text-anchor', 'start')
+          .text(function(d) { return ''; });
+
+          chartQ7.selectAll('text.pie-slice').text(function(d) {
+                return dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
+        })
+  });
      
     // QTable
         
@@ -352,7 +360,8 @@ chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);})
           .dimension(runDimension)
           .size(Infinity)
           .showSections(false)
-          .columns([d=>"<a title='Ver rede de sócios' href='rede_socios.html?cnpj="+d.cnpj+"'>"+d.cnpj+"</a>", 'empresa', 'state', 'natureza_legal','total_capital' ,'quantidade_socios'])
+          .columns([d=>"<a title='Ver rede de sócios' href='rede_socios.html?cnpj="+d.cnpj+"'>"+d.cnpj+"</a>", d => d.empresa, d => d.state, 
+            d => d.natureza_legal, d => d.total_capital , d => d.quantidade_socios])
           .sortBy(function (d) { return [d.empresa]; })
           .order(d3.ascending)
           .on('preRender', update_offset)
