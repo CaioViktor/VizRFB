@@ -1,8 +1,8 @@
  // const  path_estabelecimentos = path_data+"estabelecimenos_min.csv";
-const  path_empresas = "static/data/dados_empresas.csv";
+const  path_empresas = path_data+"dados_empresas.csv";
 
 
-const  path_brazil = "static/data/brazil.json";
+const  path_brazil = path_data+"brazil.json";
 
 const width = 800
 const height = 600
