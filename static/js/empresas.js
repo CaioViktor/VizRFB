@@ -31,7 +31,7 @@ var tabela = new dc.DataTable("#tabelaempresa");
 var chartQ8 = new dc.ScatterPlot("#Q8");
 var chartQ7 = new dc.PieChart("#Q7");
 
-var runDimension, runGroup;
+var runDimension7, runGroup, runDimensionQ8, speedSumGroup;
 
 
 
@@ -256,8 +256,9 @@ d3.json(path_brazil).then(function(data2){
   });
 
 // Q8
-  runDimension = facts.dimension(function(d) {return [+d.quantidade_socios, +d.total_capital]; });
-  runGroup = runDimension.group();
+  runDimensionQ8 = facts.dimension(function(d) {return [+d.quantidade_socios, +d.total_capital]; });
+
+  runGroup = runDimensionQ8.group();
 
   var symbolScale = d3.scaleLinear().domain([0, 100]);
  /* var symbolAccessor = function(d) { return symbolScale(d.key[0]); };
@@ -270,21 +271,26 @@ d3.json(path_brazil).then(function(data2){
 */
   
 
-
     chartQ8.width((w / 3) * 1.0)
     .height(h / 3)
         .margins({top: 20, right: 20, bottom: 40, left: 30})
         .x(symbolScale)
         .brushOn(true)
         .symbolSize(8)
+        .highlightedSize(20)
         .elasticY(true)
         ._rangeBandPadding(1)
         .clipPadding(10)
+        .on("filtered", function(chart,filter){
+              createMap()
+        })
         .yAxisLabel("Total Capital")
         .xAxisLabel("Quantidade de Sócios")
-        .dimension(runDimension)
+        .dimension(runDimensionQ8)
         .group(runGroup)
         .colors(['#000'])
+
+       
 
     
 
@@ -311,23 +317,19 @@ chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);})
   var qtds = 0;
    
   // Q7
-  
-     var runDimension  = facts.dimension(function(d) {
-        
-          qtds = d3.format(".2f")(d.quantidade_natureza_legal);
-        return d.natureza_legal+"-"+qtds;})
-      speedSumGroup = runDimension.group().reduceSum(function(d) {
 
-        return qtds});
+    runDimensionQ7  = facts.dimension(function(d) { 
+        qtds = d3.format(".2f")(d.quantidade_natureza_legal);
+        return d.natureza_legal+"-"+qtds;
+      })
+        speedSumGroup = runDimensionQ7.group();
 
   chartQ7
     .width((w / 3) * 1.50)
     .height(h / 3)
     .slicesCap(8)
-
-    .dimension(runDimension)
+    .dimension(runDimensionQ7)
     .group(speedSumGroup)
-
     .legend(dc.legend().itemHeight(13).gap(5).highlightSelected(true))
    
     .on("filtered", function(chart,filter){
