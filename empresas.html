@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<title>VizRFB</title>
+	
+	<link rel="stylesheet" type="text/css" href="static/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="static/css/dc.css">
+	<link rel="stylesheet" type="text/css" href="static/css/style.css">
+  <link rel="stylesheet" type="text/css" href="static/css/style_menu.css">
+
+	<script type="text/javascript" src="static/js/jquery-3.5.1.min.js"></script>
+	<script type="text/javascript" src="static/js/d3.js"></script>
+	<script type="text/javascript" src="static/js/crossfilter.min.js"></script>
+	<script type="text/javascript" src="static/js/dc.js"></script>
+  <script type="text/javascript" src="static/js/menu.js"></script>
+	<script src="static/js/topojson-client.js"></script>
+
+  <script type="text/javascript" src="static/js/bootstrap.js"></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<nav class="nav-bar">
+        <div class="toggle-menu">
+          <div class="line line1"></div>
+          <div class="line line2"></div>
+          <div class="line line3"></div>
+        </div>
+        <ul class="nav-list">
+          <li class="nav-list-item"><a href="index.html" class="nav-link">Início</a></li>
+          <li class="nav-list-item"><a href="empresas.html" class="nav-link">Empresas</a></li>
+          <li class="nav-list-item"><a href="estabelecimentos.html" class="nav-link">Estabelecimentos</a></li>
+          <li class="nav-list-item"><a href="socios.html" class="nav-link">Sócios</a></li>
+          <li class="nav-list-item"><a href="contato.html" class="nav-link">Contato</a></li>
+        </ul>
+      </nav>
+
+<div class="container-fluid">
+<span class="display-qux"></span>
+<div class="row">
+
+ <div class="col-4">  </div>
+   <div class="col-4">  
+  	<h1 >Empresas ao Redor do Brasil</h1>
+  </div>
+  <div class="col-6">  </div>
+</div>
+<div class="row">
+  <div class="col-4"></div>
+  <div id="Q12" class="col-xs-8 col-sm-8 col-md-8"></div>
+
+ </div>
+
+ <div class="row">
+  <div class="col-3"></div>
+  <div id="Q8" class="col-3"></div>
+  <div id="Q7" class="col-3"></div>
+  <div class="col-3"></div>
+ </div>
+
+
+<div class="row">
+      <div id="piechart"><h4>Empresas:</h4>
+        <div class="reset" style="visibility: hidden;">Selecionado: <span class="filter"></span>
+          <a href="javascript:piechart.filterAll();dc.redrawAll();">Resetar</a>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div id="paging">
+        Exibindo <span id="begin"></span>-<span id="end"></span> de <span id="size"></span> <span id="totalsize"></span>
+        <input id="last" class="btn" type="Button" value="Anterior" onclick="javascript:last()" />
+        <input id="next" class="btn" type="button" value="Próxima" onclick="javascript:next()"/>
+      </div>
+      <table id="tabela" class="table table-striped">
+            <thead>
+                <tr class="header">
+                    <th>CNPJ Raiz</th>
+                    <th>CNPJ</th>
+                    <th>Nome</th>
+                    <th>Porte</th>
+                    <th>Início das atividades</th>
+                    <th>Sitação</th>
+                    <th>Data da situação</th>
+                    <th>UF</th>
+                    <th>Atividade econômica</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+ </div>
+
+	<script type="text/javascript" src="static/js/empresas.js"></script>
+<script type="text/javascript" src="static/js/bootstrap.js"></script>
+</body>
+</html>
