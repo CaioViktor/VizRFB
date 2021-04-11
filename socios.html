@@ -17,26 +17,26 @@
 	<!-- <script type="text/javascript" src="https://unpkg.com/dc@4/dist/dc.js"></script> -->
 	<script src="static/js/topojson-client.js"></script>
 	<script type="text/javascript" src="static/js/main.js"></script>
-	<script type="text/javascript" src="static/js/menu.js"></script>
 
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-	<nav class="nav-bar">
-		<div class="toggle-menu">
-		      <div class="line line1"></div>
-		      <div class="line line2"></div>
-		      <div class="line line3"></div>
-		    </div>
-		    <ul class="nav-list">
-		      <li class="nav-list-item"><a href="index.html" class="nav-link">Início</a></li>
-		      <li class="nav-list-item"><a href="empresas.html" class="nav-link">Empresas</a></li>
-		      <li class="nav-list-item"><a href="estabelecimentos.html" class="nav-link">Estabelecimentos</a></li>
-		      <li class="nav-list-item"><a href="socios.html" class="nav-link">Sócios</a></li>
-		      <li class="nav-list-item"><a href="contato.html" class="nav-link">Contato</a></li>
-		    </ul>
-	</nav>
+
+  <div class="hamburger-menu">
+    <input id="menu__toggle" type="checkbox" />
+    <label class="menu__btn" for="menu__toggle">
+      <span></span>
+    </label>
+
+    <ul class="menu__box">
+      <li><a class="menu__item" href="index.html">Início</a></li>
+      <li><a class="menu__item" href="empresas.html">Empresas</a></li>
+      <li><a class="menu__item" href="estabelecimentos.html">Estabelecimentos</a></li>
+      <li><a class="menu__item" href="socios.html">Sócios</a></li>
+    </ul>
+  </div>
+
 	<div id="main" class="container-fluid">
 	    <div class='row'>
 	    	<div class="col-6">
