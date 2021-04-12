@@ -31,9 +31,7 @@ var tabela = new dc.DataTable("#tabelaempresa");
 var chartQ8 = new dc.ScatterPlot("#Q8");
 var chartQ7 = new dc.PieChart("#Q7");
 
-var runDimension7, runGroup, runDimensionQ8, speedSumGroup;
-
-
+var chartDimension7, chartQ8Group, chartDimensionQ8, chartQ7Group;
 
 var ofs = 0, pag = 100;
 
@@ -256,20 +254,11 @@ d3.json(path_brazil).then(function(data2){
   });
 
 // Q8
-  runDimensionQ8 = facts.dimension(function(d) {return [+d.quantidade_socios, +d.total_capital]; });
+  chartDimensionQ8 = facts.dimension(function(d) {return [+d.quantidade_socios, +d.total_capital]; });
 
-  runGroup = runDimensionQ8.group();
+  chartQ8Group = chartDimensionQ8.group();
 
   var symbolScale = d3.scaleLinear().domain([0, 100]);
- /* var symbolAccessor = function(d) { return symbolScale(d.key[0]); };
-  var subChart = function(c) {
-    return new dc.ScatterPlot(c)
-        .symbol(symbolAccessor)
-        .symbolSize(8)
-        .highlightedSize(20)
-  };
-*/
-  
 
     chartQ8.width((w / 3) * 1.0)
     .height(h / 3)
@@ -286,31 +275,11 @@ d3.json(path_brazil).then(function(data2){
         })
         .yAxisLabel("Total Capital")
         .xAxisLabel("Quantidade de Sócios")
-        .dimension(runDimensionQ8)
-        .group(runGroup)
+        .dimension(chartDimensionQ8)
+        .group(chartQ8Group)
         .colors(['#000'])
-
-       
-
-    
-
-
-/*
- chartQ8.on("renderlet.chart", function(chart){
-    chartQ8.selectAll('path.symbol').on('click',function(){alert("Teste");});
-  });
-
-chartQ8.on('pretransition', function(chart) {
-        chartQ8.selectAll('text').text(function(d) {
-            
-        })
-    })
-    .on("filtered", function(chart,filter){
-              createMap()
-        });
-*/
  
-chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);});
+  chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);});
   chartQ8.margins().left += 60;
 
 
@@ -318,18 +287,18 @@ chartQ8.yAxis().tickFormat(function(d) {return d3.format(',d')(d+10000000000);})
    
   // Q7
 
-    runDimensionQ7  = facts.dimension(function(d) { 
+  chartDimensionQ7  = facts.dimension(function(d) { 
         qtds = d3.format(".2f")(d.quantidade_natureza_legal);
         return d.natureza_legal+"-"+qtds;
       })
-        speedSumGroup = runDimensionQ7.group();
+        chartQ7Group = chartDimensionQ7.group();
 
   chartQ7
     .width((w / 3) * 1.50)
     .height(h / 3)
     .slicesCap(8)
-    .dimension(runDimensionQ7)
-    .group(speedSumGroup)
+    .dimension(chartDimensionQ7)
+    .group(chartQ7Group)
     .legend(dc.legend().itemHeight(13).gap(5).highlightSelected(true))
    
     .on("filtered", function(chart,filter){
@@ -352,14 +321,14 @@ chartQ7.on('pretransition', function(chart) {
      
     // QTable
         
-        var runDimension = facts .dimension(function(d) {return [d.empresa];}),
+        var chartDimension = facts .dimension(function(d) {return [d.empresa];}),
         experimentDimension = facts  .dimension(function(d) {return d.empresa;}),
         experimentGroup = experimentDimension.group().reduceCount();
 
         tabela
           .width(300)
           .height(480)
-          .dimension(runDimension)
+          .dimension(chartDimension)
           .size(Infinity)
           .showSections(false)
           .columns([d=>"<a title='Ver rede de sócios' href='rede_socios.html?cnpj="+d.cnpj+"'>"+d.cnpj+"</a>", d => d.empresa, d => d.state, 
@@ -370,23 +339,9 @@ chartQ7.on('pretransition', function(chart) {
           .on('preRedraw', update_offset)
           .on('pretransition', display);
 
-     /*   tabela.width(w)
-            .height(h)
-            .dimension(dim_cnpj)
-            .size(Infinity)
-            .columns([d=>"<a title='Ver rede de sócios' href='rede_socios.html?cnpj="+d.cnpj+"'>"+d.cnpj+"</a>",d=>d.cnpj,d=>d.empresa,d=>d.state,d=>d.natureza_legal,d=>d.total_capital,d=>d.quantidade_socios])
-            .sortBy(d=>d.cnpj)
-            .order(d3.ascending)
-            .on('preRender', update_offset)
-            .on('preRedraw', update_offset)
-            .on('pretransition', display);*/
-
   dc.renderAll();
 
   return data;
-
-
-
 
       function update_offset() {
           var totFilteredRecs = facts.groupAll().value();
