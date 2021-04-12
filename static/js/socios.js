@@ -20,7 +20,7 @@ let enterpriseGroup = null
 
 var dataset = d3.csv(path_socios).then(function (data) {
 
-	data = data.slice(25000,30000)
+	data = data.slice(4000,30000)
 	facts = crossfilter(data);
 
 	enterpriseDim = facts.dimension(d => d.empresa);
@@ -52,8 +52,19 @@ var dataset = d3.csv(path_socios).then(function (data) {
 	          .cap(10)
 
 
-	qualificationDim = facts.dimension(d => d.qualification.substring(0,30))
-	qualificationGroup = qualificationDim.group().reduceCount()
+	function remove_empty_bins(source_group) {
+	    return {
+	        all:function () {
+	            return source_group.all().filter(function(d) {
+	                //return Math.abs(d.value) > 0.00001; // if using floating-point numbers
+	                return d.value !== 0; // if integers only
+	            });
+	        }
+    	};
+	}
+
+	qualificationDim = facts.dimension(d => d.qualification.substring(0,50))
+	qualificationGroup = remove_empty_bins(qualificationDim.group().reduceCount())
 
 	var diferent_qual = new Set()
 	data.forEach(function (d) {if (d.qualification != "") {diferent_qual.add(d.qualification);}})
@@ -61,7 +72,7 @@ var dataset = d3.csv(path_socios).then(function (data) {
 
 	colorScale = d3.scaleOrdinal()
                  .domain(diferent_qual)
-                 .range(['#8dd3c7','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f','#ffffb3','#bebada','#1f78b4','#b2df8a','#33a02c','#fb9a99'])
+                 .range(['#8dd3c7','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f','#bbc252','#bebada','#1f78b4','#b2df8a','#33a02c','#fb9a99','#73a37e'])
 
 	piechartQ10.width(w/2)
 	   		   .height(h/3)
@@ -69,6 +80,11 @@ var dataset = d3.csv(path_socios).then(function (data) {
 			   .group(qualificationGroup)
 			   .colors(colorScale)
 			   .legend(dc.legend())
+			   .on('pretransition', function(chart) {
+			        piechartQ10.selectAll('text.pie-slice').text(function(d) {
+			            return dc.utils.printSingleValue((d.endAngle - d.startAngle) / (2*Math.PI) * 100) + '%';
+			        })
+			    })
 			   .on('renderlet', function(chart) {
 			      chart.selectAll('rect').on('click', function(d) {
 			         console.log('click!', d);
@@ -77,25 +93,63 @@ var dataset = d3.csv(path_socios).then(function (data) {
 
 
 	let enterprise_numbers = sorted.map(d => d.key.split('-')[0])
-	let ordinalScaleNumbers = d3.scaleOrdinal().domain(enterprise_numbers)
 
 	var xdim = facts.dimension(function (d) {return d.empresa.split('-')[0];});
   
 	var ydim = xdim.group().reduce(
 	  function(p, v) {
 	    p[v.qualification] = (p[v.qualification] || 0) + 1;
-	    return p;}, 
+	    // console.log(v)
+	    // console.log(p)
+	    return p;
+	}, 
 	  function(p, v) {
 	    p[v.qualification] = (p[v.qualification] || 0) - 1;
-	    return p;}, 
+	    return p;
+	}, 
 	  function() {
 	    return {};
 	  });
 
 	function sel_stack(valueKey) {
-	  return function(d) {
-	    return d.value[valueKey];
-	};}
+		return function(d) {
+		  	// console.log(d)
+		    return d.value[valueKey];
+		};
+	}
+
+	
+	function getTops(source_group) {
+		return {
+		    all: function () {
+		    	let top10 = []
+		    	source_group.all().forEach(function(d){
+		    		let total = 0;
+		    		for(sub in d.value){
+		    			total+= d.value[sub];
+		    		}
+		    		top10.push({'key':total,'value':d})
+		    	})
+		    	top10.sort(function(a,b){
+		    		return  b['key'] - a['key'] ;
+		    	})
+		    	let top10v = []
+		    	for(i=0;i<10;i++){
+		    		top10v.push(top10[i].value);
+		    	}
+		        return top10v;
+		    }
+		};
+	}
+
+	var fakeGroup = getTops(ydim);
+	let topEmpr = [];
+
+	fakeGroup.all().forEach(function(d){
+		topEmpr.push(d.key)
+	})
+
+	let ordinalScaleNumbers = d3.scaleOrdinal().domain(topEmpr)
 
 	barchartQ52
 			  .width(w/2)
@@ -113,16 +167,27 @@ var dataset = d3.csv(path_socios).then(function (data) {
 			  //.x(d3.scaleLinear().domain([1, 10]))
 			  .x(ordinalScaleNumbers)
 			  .dimension(xdim)
-			  .group(ydim, diferent_qual[0], sel_stack(diferent_qual[0]))
+			  .group(fakeGroup, diferent_qual[0], sel_stack(diferent_qual[0]))
 			  .renderLabel(false)
 			  .colors(colorScale)
 			  .xUnits(dc.units.ordinal)
 			  //.legend(dc.legend());
 			  
 			  for (var i = 1; i < diferent_qual.length; ++i) {
-			     barchartQ52.stack(ydim, '' + diferent_qual[i], sel_stack(diferent_qual[i]));
+			     barchartQ52.stack(fakeGroup, '' + diferent_qual[i], sel_stack(diferent_qual[i]));
 			  }
 
+
+	remove_empty_values = (source_group) => {
+	    return {
+	        all: () => {
+	            return source_group.all().filter(function(d) {
+	                // here your condition
+	                return d.key !== null && d.key !== '' && d.value !== 0; // etc. 
+	            });
+	        }
+	    };
+	}
 
 	typeDim = facts.dimension(d => d.qualificacao_repr)
 	typeGroup = typeDim.group().reduceCount(d => d.empresa)
@@ -131,11 +196,12 @@ var dataset = d3.csv(path_socios).then(function (data) {
 	data.forEach(function (d) {if (d.qualificacao_repr != "") {diferent_types.add(d.qualificacao_repr);}})
 	ordinalScaleType = d3.scaleOrdinal().domain(Array.from(diferent_types))
 
-	barchartQ6.width(w/3)
+	barchartQ6.width(w/2)
           .height(h/2)
-          .margins({top: 10, right: 50, bottom: 30, left: 40})
+          .margins({left: 40, top: 20, right: 350, bottom: 40})
+          .gap(50)
           .dimension(enterpriseDim)
-          .group(typeGroup)
+          .group(remove_empty_values(typeGroup))
           .x(ordinalScaleType)
           .centerBar(false)
           .ordering(function(d) {return -d.value})
@@ -144,6 +210,20 @@ var dataset = d3.csv(path_socios).then(function (data) {
 
 
 	dc.renderAll();
+
+	// function AddXAxis(chartToUpdate, displayText)
+	// {
+	//     chartToUpdate.svg()
+	//                 .append("text")
+	//                 .attr("class", "x-axis-label")
+	//                 .attr("text-anchor", "middle")
+	//                 .attr("x", chartToUpdate.width()/2)
+	//                 .attr("y", chartToUpdate.height()+2)
+	//                 .text(displayText);
+	// }
+
+	// AddXAxis(rowchartQ5, "Número de sócios");
+
 	return data
 
 });
