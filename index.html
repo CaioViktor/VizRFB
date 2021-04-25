@@ -50,25 +50,29 @@
       <h1>Portal de Visualização de Dados da RFB</h1>
       
         <div class="main-slider">
-              <div class="slide-text">
-                  <div class='row'>
-                    
-                    
-
-                    <div class="col-6">
-                                              <a href="#dashboard"> <button type="button" class="btn btn-outline-primary" data-mdb-ripple-color="dark">Ver Dashboards</button></a>
-                    </div>
- <div class="col-6">
-                      <img src="static/images/front.PNG" class="slider-sun" alt="slider image">
-
+              <div class="slide-text" id ="mains">
+                  <div class='row'>      
+              <div class="col-12">
+  
+                      <img src="static/images/front.png" class="slider-sun" alt="slider image">
                     </div>
                    
                     <!--<img src="" class="slider-hill" alt="slider image">-->
+
                 </div>
+                <div class='row'> 
+                  
+                                 </div>
+                                <div class="col-12">
+                                   <a href="#dashboard"> <button type="button" class="btn btn-outline-primary" data-mdb-ripple-color="dark">Ver Dashboards</button></a>
+                                 </div>
+
               </div>
               <div class="social-links">
                 <a href="https://github.com/CaioViktor/VizRFB" class="github"><i class="bx bxl-github"></i></a>
               </div>
+
+                                             
         </div>
     </div>
   </section><!-- End Hero -->
@@ -81,7 +85,7 @@
 
         <div class="section-title">
           <h2>Descrição da Fonte de Dados </h2>
-          <p>No Brasil cada vez mais tem surgido a necessidade de se gerenciar e controlar gastos fiscais. No Brasil, a Receita Federal do Brasil (RFB) é responsável por cadastrar e gerenciar os dados de empresas regularmente cadastradas. Estes dados são disponibilizados publicamente na internet. No entanto, estes dados são disponibilizados em um formato proprietário e de difícil acesso e compreensão, além de apresentam-se em grande volume o que dificulta a tarefa de análise. Deste modo, este portal apresenta visualizações dos dados de empresas, seus sócios e estabelecimentos cadastrados na RFB .
+          <p>No Brasil, cada vez mais tem surgido a necessidade de se gerenciar e controlar gastos fiscais. No Brasil, a Receita Federal do Brasil (RFB) é responsável por cadastrar e gerenciar os dados de empresas regularmente cadastradas. Estes dados são disponibilizados publicamente na internet. No entanto, estes dados são disponibilizados em um formato proprietário e de difícil acesso e compreensão, além de apresentam-se em grande volume o que dificulta a tarefa de análise. Deste modo, este portal apresenta visualizações dos dados de empresas, seus sócios e estabelecimentos cadastrados na RFB .
 </p>
         </div>
 
@@ -129,7 +133,7 @@
 
         <div class="row">
 
-          <div class="col-lg-4 col-md-6">
+          <div class="col-lg-3 col-md-3" id = "resize-ind">
             <div class="count-box">
               <i class="bi bi-building"></i>
               <span data-purecounter-start="0" data-purecounter-end="19473" data-purecounter-duration="1" class="purecounter"></span>
@@ -137,7 +141,7 @@
             </div>
           </div>
 
-          <div class="col-lg-4 col-md-6 mt-5 mt-md-0">
+          <div class="col-lg-3 col-md-3" id = "resize-ind">
             <div class="count-box">
               <i class="bi bi-shop"></i>
               <span data-purecounter-start="0" data-purecounter-end="29999" data-purecounter-duration="1" class="purecounter"></span>
@@ -145,10 +149,10 @@
             </div>
           </div>
 
-          <div class="col-lg-4 col-md-6 mt-5 mt-lg-0">
+          <div class="col-lg-3 col-md-3" id = "resize-ind">
             <div class="count-box">
               <i class="bi bi-person-fill"></i>
-              <span data-purecounter-start="0" data-purecounter-end="5790" data-purecounter-duration="1" class="purecounter"></span>
+              <span data-purecounter-start="0" data-purecounter-end="30000" data-purecounter-duration="1" class="purecounter"></span>
               <p>Sócios</p>
             </div>
           </div>
@@ -219,7 +223,7 @@
         </div>
 
       </div>
-    </section><
+    </section>
 
     <section id="portfolio" class="portfolio section-bg">
       <div class="container" data-aos="fade-up">
@@ -256,8 +260,10 @@
               <div class="portfolio-info">
                 <h4>Dashboard de Estabelecimentos</h4>
                 <p>Ver</p>
-                  <a href="estabelecimentos.html" title="Dashboard Estabelecimentos"><i class="bx bx-link"></i></a>
+                <div class="portfolio-links">
+                  <a href="estabelecimentos.html" class="portfolio-lightbox" title="Dashboard Estabelecimentos"><i class="bx bx-link"></i></a>
                   
+                </div>
               </div>
             </div>
           </div>
@@ -268,8 +274,10 @@
               <div class="portfolio-info">
                 <h4>Dashboard Sócios</h4>
                 <p>Ver</p>
-                  <a href="socios.html" title="Dashboard Sócios"><i class="bx bx-link"></i></a>
+                <div class="portfolio-links">
+                  <a href="socios.html" class="portfolio-lightbox" title="Dashboard Sócios"><i class="bx bx-link"></i></a>
                   
+                </div>
               </div>
             </div>
           </div>
@@ -286,36 +294,39 @@
         </div>
 
             <div class="row">
-                <div class="col-sm-4 text-center padding wow fadeIn" data-wow-duration="1000ms" data-wow-delay="300ms">
+                <div class="col-lg-3 text-center padding wow fadeIn" data-wow-duration="1000ms" data-wow-delay="300ms">
                     <div class="single-service">
                         <div class="wow scaleIn" data-wow-duration="500ms" data-wow-delay="300ms">
                             <img src="" alt="">
                         </div>
-                        <h2>Caio Viktor Silva Avila (UFC)</h2>
+                        
+                    </div>
+                    <h4>Caio Viktor Silva Avila (UFC)</h4>
                         <p>Aluno de Doutorado (MDCC)</p>
                         <p>(Knowledge Graphs / Linked Data </br>/ Semantic Web  / Chatbots).</p>
-                    </div>
                 </div>
-                <div class="col-sm-4 text-center padding wow fadeIn" data-wow-duration="1000ms" data-wow-delay="600ms">
+                <div class="col-lg-3 text-center padding wow fadeIn" data-wow-duration="1000ms" data-wow-delay="600ms">
                     <div class="single-service">
                         <div class="wow scaleIn" data-wow-duration="500ms" data-wow-delay="600ms">
                             <img src="" alt="">
                         </div>
-                         <h2>Tulio Vidal Rolim (UFC)</h2>
+                         <h4>Tulio Vidal Rolim (UFC)</h4>
                         <p>Aluno de Doutorado (MDCC)</p>
                         <p>(Enterprise Knowledge Graphs / Linked Data </br> / Semantic Web / Ontologies).</p>
                     </div>
                 </div>
-                <div class="col-sm-4 text-center padding wow fadeIn" data-wow-duration="1000ms" data-wow-delay="900ms">
+
+                <div class="col-lg-3  text-center padding wow fadeIn" data-wow-duration="1000ms" data-wow-delay="900ms">
                     <div class="single-service">
                         <div class="wow scaleIn" data-wow-duration="500ms" data-wow-delay="900ms">
                             <img src="images/home/icon3.png" alt="">
                         </div>
-                         <h2>Francisco Carlos Jr. (UFC)</h2>
+                         <h4>Francisco Carlos (UFC)</h4>
                         <p>Aluno de Doutorado (MDCC)</p>
                         <p>(Data Mining / Machine Learning / IA).</p>
                     </div>
                 </div>
+
             </div>
         </div>
     </section>
