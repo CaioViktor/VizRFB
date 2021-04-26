@@ -20,17 +20,31 @@ function getComponent(id){
 	let count_edges = 0;
 	let next_list = [id];
 	let visited_list = [];
+	let label = ""
 	while(next_list.length > 0){
 		current_id = next_list.shift();
+		console.log(current_id)
 		if(g.has(current_id)){
+			console.log("Foi")
 			let neighbors = g.get(current_id);
 			visited_list.push(current_id);
-			let node = {'id':current_id,'label':current_id.split("-")[1].split(" ")[0],'x':0,'y':0,'color':colorScale("Jurídico"),'size':size};
+			// if(current_id)
+			label = current_id;
+			if(label.includes("-"))
+				label = label.split("-")[1];
+			if(label.includes(" "))
+				label = label.split(" ")[0];
+			let node = {'id':current_id,'label':label,'x':0,'y':0,'color':colorScale("Jurídico"),'size':size};
 			nodes.push(node);
 			neighbors.forEach(function(d){
 				if(d[2] == "Físico" || d[2] == "Estrangeiro"){
 					if(!visited_list.includes(d[1])){
-						let neighbor = {'id':d[1],'label':d[1].split("-")[1].split(" ")[0],'x':0,'y':0,'color':colorScale(d[2]),'size':size};
+						label = d[1];
+						if(label.includes("-"))
+							label = label.split("-")[1];
+						if(label.includes(" "))
+							label = label.split(" ")[0];
+						let neighbor = {'id':d[1],'label':label,'x':0,'y':0,'color':colorScale(d[2]),'size':size};
 						nodes.push(neighbor);
 						visited_list.push(d[1]);
 
@@ -55,7 +69,12 @@ function getComponent(id){
 				count_edges+= 1;
 				if (d[3] != ""){
 					if(!visited_list.includes(d[3])){
-						let representant = {'id':d[3],'label':d[3].split("-")[1].split(" ")[0],'x':0,'y':0,'color':colorScale("Físico"),'size':size};
+						label = d[3]
+						if(label.includes("-"))
+							label = label.split("-")[1];
+						if(label.includes(" "))
+							label = label.split(" ")[0];
+						let representant = {'id':d[3],'label':label,'x':0,'y':0,'color':colorScale("Físico"),'size':size};
 						nodes.push(representant);
 						visited_list.push(d[3]);
 
@@ -85,6 +104,7 @@ function getComponent(id){
 				}
 			});
 		}
+
 	}
 	let count = 0;
 	nodes.forEach(function(d){
@@ -98,7 +118,7 @@ var component = null;
 d3.csv(path_socios).then(function(data){
 	data.forEach(function(d){
 		//empresa,qualification,partner,type,representante,qualificacao_repr
-		let cnpj = d.empresa.split("-")[0]
+		let cnpj = d.empresa.split("-")[0];
 		if(!cpnj_to_id.has(cnpj))
 			cpnj_to_id.set(cnpj,d.empresa)
 
@@ -106,6 +126,12 @@ d3.csv(path_socios).then(function(data){
 			g.set(d.empresa,[]);
 		let edges = g.get(d.empresa);
 		edges.push([d.qualification,d.partner,d.type,d.representante,d.qualificacao_repr]);
+
+
+		if(d.type == "Jurídico"){
+			if(!g.has(d.partner))
+				g.set(d.partner,[]);
+		}
 
 		if(!g_inverse.has(d.partner))
 			g_inverse.set(d.partner,[]);
@@ -154,7 +180,12 @@ d3.csv(path_socios).then(function(data){
 				e.target.refresh();
 			});
 			s.bind('outNode', function(e) {
-				e.data.node.label = e.data.node.id.split("-")[1].split(" ")[0];
+				let label = e.data.node.id;
+				if(label.includes("-"))
+					label = label.split("-")[1];
+				if(label.includes(" "))
+					label = label.split(" ")[0];
+				e.data.node.label = label;
 				e.target.refresh();
 			});
 			s.startForceAtlas2({worker: true, barnesHutOptimize: false});

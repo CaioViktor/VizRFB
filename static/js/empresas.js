@@ -44,7 +44,6 @@ function renderMap(data,maps){
   const scaleValue = (colw*colh)*650/(633.6*474.5);
   
   
-
   var projection =  d3.geoMercator()
             // .scale(scaleValue)
             // .center([center0, center1]);
@@ -77,8 +76,9 @@ function renderMap(data,maps){
             .attr("stroke-width", 0)
             .attr("stroke","none"); //volta ao valor padrão
           clicked_state = null;
-          previous_this_map = null;
+          // previous_this_map = null;
         }else{
+          let previous_this_map = $("[element_id="+previous_filter+"]")[0];
           d3.select(previous_this_map) // seleciona o elemento atual
           .attr("stroke-width", 0)
           .attr("stroke","none"); //volta ao valor padrão
@@ -86,7 +86,7 @@ function renderMap(data,maps){
         dim_states.filterExact(clicked_state);
         dc.renderAll();
         previous_filter = clicked_state;
-        previous_this_map = this;
+        // previous_this_map = this;
     })
     .on("mouseover", function(d){
       d3.select(this) // seleciona o elemento atual
@@ -104,6 +104,7 @@ function renderMap(data,maps){
       .attr("stroke-width", 0)
       .attr("stroke","none"); //volta ao valor padrão
       if(previous_filter != null){
+        let previous_this_map = $("[element_id="+previous_filter+"]")[0];
       d3.select(previous_this_map) // seleciona o elemento atual
           .attr("stroke-width", 3)
           .attr("stroke","red");
@@ -121,8 +122,15 @@ function renderMap(data,maps){
         .attr("id","tooltip")
         .attr("class","hidden")
         .append("p")
-        .html("<h4 id='name_county'></h4>Quantidade de empresas: <span id='qtd'></span><br/>População: <span id='pop'></span><br/>Taxa de empresas para 100.000 habitantes: <b><span id='taxa'></span></b>")
+        .html("<h4 id='name_county'></h4>Quantidade de estabelecimentos: <span id='qtd'></span><br/>População: <span id='pop'></span><br/>Taxa de estabelecimentos para 100.000 habitantes: <b><span id='taxa'></span></b>")
 
+  // Once we append the vis elments to it, we return the DOM element for Observable to display above.
+  if(previous_filter!=null){
+    let previous_this_map = $("[element_id="+previous_filter+"]")[0];
+    d3.select(previous_this_map) // seleciona o elemento atual
+          .attr("stroke-width", 3)
+          .attr("stroke","red");
+  }
   return svg.node()
 }
 

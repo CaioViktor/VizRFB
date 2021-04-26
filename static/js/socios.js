@@ -78,6 +78,7 @@ var dataset = d3.csv(path_socios).then(function (data) {
 	   		   .height(h/3)
 			   .dimension(qualificationDim)
 			   .group(qualificationGroup)
+			   .slicesCap(5)
 			   .colors(colorScale)
 			   .legend(dc.legend())
 			   .on('pretransition', function(chart) {
@@ -196,17 +197,18 @@ var dataset = d3.csv(path_socios).then(function (data) {
 	data.forEach(function (d) {if (d.qualificacao_repr != "") {diferent_types.add(d.qualificacao_repr);}})
 	ordinalScaleType = d3.scaleOrdinal().domain(Array.from(diferent_types))
 
+
 	barchartQ6.width(w/2)
           .height(h/2)
           .margins({left: 40, top: 20, right: 350, bottom: 40})
           .gap(50)
           .dimension(enterpriseDim)
+          .ordering(function(d) {return -d.value})
           .group(remove_empty_values(typeGroup))
           .x(ordinalScaleType)
           .centerBar(false)
-          .ordering(function(d) {return -d.value})
           .elasticY(true)
-          .xUnits(dc.units.ordinal)
+          .xUnits(dc.units.ordinal);
 
 
 	dc.renderAll();

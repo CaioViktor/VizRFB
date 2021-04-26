@@ -311,7 +311,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
 			        createMap()
 			});
 
-			console.log(lineChartQ11);
+			// console.log(lineChartQ11);
 
     let dim_date_start_filter = facts.dimension(d=>d.date_start_month);
     let group_date_start_filter = dim_date_start.group();
@@ -461,7 +461,7 @@ var data = d3.csv(path_estabelecimentos).then(function(data){
             .height(h)
             .dimension(dim_cnpj)
             .size(Infinity)
-            .columns([d=>"<a title='Ver rede de sócios' href='rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
+            .columns([d=>"<a title='Ver rede de sócios' target='_blank' href='rede_socios.html?cnpj="+d.root_cnpj+"'>"+d.root_cnpj+"</a>",d=>d.cnpj_est,d=>d.name,d=>d.porte,d=>d.date_start.toLocaleDateString(),d=>d.situation,d=>d.situationDate.toLocaleDateString(),d=>d.state,d=>d.activity])
             .sortBy(d=>d.root_cnpj)
             .order(d3.ascending)
             .on('preRender', update_offset)
